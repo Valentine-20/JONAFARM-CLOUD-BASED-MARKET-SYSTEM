@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<title>JonaFarm Market - Farmer Dashboard</title>
+<style>
+body { font-family: Arial; background-color: #f5f5dc; margin: 0; padding: 0; }
+header { background-color: #8b4513; color: white; padding: 15px; text-align: center; }
+.welcome { margin: 20px; font-size: 20px; color: #4b2e2e; }
+.products-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin: 20px; }
+.card { background-color: #fff8f0; border-radius: 15px; width: 200px; padding: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; position: relative; }
+.card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; display: block; }
+.card h3 { margin: 10px 0 5px 0; color: #8b4513; }
+.card p { margin: 5px 0; color: #555; }
+.card button { margin-top: 5px; padding: 8px 12px; background-color: #d2691e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+.card button:hover { background-color: #8b4513; }
+.harvest-btn-overlay { position: absolute; top: 5px; right: 5px; background-color: rgba(210,105,30,0.6); color: white; border: none; border-radius: 50%; padding: 6px 9px; cursor: pointer; font-size: 16px; z-index: 10; transition: 0.3s; }
+.harvest-btn-overlay:hover { background-color: rgba(210,105,30,0.85); }
+.harvest-info-overlay { display: none; position: absolute; bottom: 5px; left: 5px; right: 5px; background-color: rgba(255,243,224,0.95); border-radius: 8px; padding: 8px; font-size: 13px; color: #4b2e2e; z-index: 9; text-align: left; }
+.orders-container { max-width: 1000px; margin: 30px auto; background-color: #fff8f0; padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.orders-container h3 { color: #8b4513; text-align: center; margin-bottom: 20px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px; text-align: center; border-bottom: 1px solid #ccc; }
+th { background-color: #a0522d; color: white; }
+.status-btn { padding: 5px 10px; background-color: #d2691e; color: white; border: none; border-radius: 8px; cursor: pointer; }
+.status-btn:hover { background-color: #8b4513; }
+.verified-block { background-color: #d4edda; } /* highlight verified products in blockchain */
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo.png" alt="JonaFarm Market Logo" style="height:60px; vertical-align:middle;">
+  <h1 style="display:inline-block; margin-left:10px; vertical-align:middle;">JonaFarm Market Dashboard</h1>
+</header>
+
+<div class="welcome" id="welcome-msg">Welcome, Farmer!</div>
+
+<div class="products-container" id="product-cards">
+  <!-- Product cards inserted by JS -->
+</div>
+
+<div class="orders-container">
+  <h3>Orders</h3>
+  <table id="orders-table">
+    <thead>
+      <tr>
+        <th>Buyer Name</th>
+        <th>Phone</th>
+        <th>Address</th>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Total Price</th>
+        <th>Order Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Orders dynamically inserted -->
+    </tbody>
+  </table>
+</div>
+
+<!-- Blockchain container -->
+<div class="orders-container" style="margin-top:50px;">
+  <h3>Product Blockchain</h3>
+  <table id="blockchain-table">
+    <thead>
+      <tr>
+        <th>Index</th>
+        <th>Timestamp</th>
+        <th>Action</th>
+        <th>Product</th>
+        <th>Previous Hash</th>
+        <th>Hash</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Blockchain blocks inserted by JS -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+const farmer = JSON.parse(localStorage.getItem('farmer'));
+if (!farmer) window.location.href = 'login.html';
+else document.getElementById('welcome-msg').textContent = `Welcome, ${farmer.name} from ${farmer.farm || 'your farm'}!`;
+
+// Render product cards
+function renderProductCards(products) {
+  const productCards = document.getElementById('product-cards');
+  productCards.innerHTML = '';
+  products.forEach(p => {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.innerHTML = `
+      <div style="position: relative;">
+        <img src="${p.image}" alt="${p.name}">
+        <button class="harvest-btn-overlay">⋮</button>
+        <div class="harvest-info-overlay">
+          Last Harvest: ${p.lastHarvestDate || '2026-01-12'} <br>
+          Next Harvest: ${p.nextHarvestDate || '2026-04-12'}
+        </div>
+      </div>
+      <h3>${p.name}</h3>
+      <p>Price: KSh ${p.price_ksh} per ${p.unit}</p>
+      <p>Quantity: ${p.quantity} ${p.unit}</p>
+      <p>Status: <span id="status-${p.name}">${p.verified ? "✅ Verified" : "❌ Not Verified"}</span></p>
+      ${!p.verified ? `<button id="verify-${p.name}">Verify</button>` : ""}
+    `;
+    productCards.appendChild(card);
+
+    const harvestBtn = card.querySelector('.harvest-btn-overlay');
+    const harvestInfo = card.querySelector('.harvest-info-overlay');
+    harvestBtn.addEventListener('click', () => {
+      harvestInfo.style.display = harvestInfo.style.display === 'block' ? 'none' : 'block';
+    });
+
+    if (!p.verified) {
+      const verifyBtn = document.getElementById(`verify-${p.name}`);
+      verifyBtn.addEventListener('click', async () => {
+        try {
+          const res = await fetch('/products/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: p.name })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            document.getElementById(`status-${p.name}`).textContent = "✅ Verified";
+            verifyBtn.remove();
+            await loadProductBlockchain(); // refresh blockchain AFTER verification
+          } else alert(data.message);
+        } catch(err) { console.error(err); }
+      });
+    }
+  });
+}
+
+// Load products then orders
+async function loadProducts() {
+  try {
+    const res = await fetch('/products');
+    const products = await res.json();
+    window.productsList = products;
+    renderProductCards(products);
+    await loadOrders(); // Orders load AFTER products
+  } catch(err) { console.error(err); }
+}
+
+// Load orders
+async function loadOrders() {
+  if (!window.productsList) return;
+  try {
+    const res = await fetch(`/orders/farmer/${encodeURIComponent(farmer.name)}`);
+    const orders = await res.json();
+    const tbody = document.querySelector('#orders-table tbody');
+    tbody.innerHTML = '';
+
+    orders.forEach(order => {
+      const product = window.productsList.find(p => p.name.trim().toLowerCase() === order.product.trim().toLowerCase());
+      const price = product ? product.price_ksh : 0;
+      const totalPrice = price * order.quantity;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${order.buyer}</td>
+        <td>${order.phone}</td>
+        <td>${order.address}</td>
+        <td>${order.product}</td>
+        <td>${order.quantity}</td>
+        <td>${totalPrice > 0 ? 'KSh ' + totalPrice : 'N/A'}</td>
+        <td>${order.order_date ? new Date(order.order_date).toLocaleString() : 'N/A'}</td>
+        <td><button class="status-btn" onclick="markDelivered('${order.id}')">${order.status || 'Pending'}</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch(err) { console.error(err); }
+}
+
+// Mark order delivered
+async function markDelivered(orderId) {
+  try {
+    const res = await fetch(`/orders/update/${orderId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'Delivered' })
+    });
+    if (res.ok) loadOrders();
+    else {
+      const data = await res.json();
+      alert(data.message || 'Error updating order');
+    }
+  } catch(err) { console.error(err); }
+}
+
+// Load product blockchain
+async function loadProductBlockchain() {
+  try {
+    const res = await fetch('/blockchain/products');
+    const chain = await res.json();
+    const tbody = document.querySelector('#blockchain-table tbody');
+    tbody.innerHTML = '';
+
+    chain.forEach(block => {
+      const tr = document.createElement('tr');
+      if (block.productAction.action === 'Verify Product') tr.classList.add('verified-block');
+      tr.innerHTML = `
+        <td>${block.index}</td>
+        <td>${new Date(block.timestamp).toLocaleString()}</td>
+        <td>${block.productAction.action}</td>
+        <td>${block.productAction.product.name || block.productAction.product}</td>
+        <td style="word-break: break-all;">${block.previousHash}</td>
+        <td style="word-break: break-all;">${block.hash}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch(err) {
+    console.error('Error loading blockchain:', err);
+  }
+}
+
+// Init
+loadProducts().then(() => loadProductBlockchain());
+</script>
+
+</body>
+</html>

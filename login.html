@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JonaFarm Market - Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5dc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      background-color: #fff8f0;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 350px;
+      text-align: center;
+    }
+    .login-container img.logo {
+      width: 150px;
+      margin-bottom: 15px;
+    }
+    h2 {
+      color: #8b4513;
+      margin: 10px 0;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 95%;
+      padding: 10px;
+      background-color: #a0522d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #8b4513;
+    }
+    .error {
+      color: red;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <!-- Logo only -->
+    <img src="JonaFarm-logo.png" alt="JonaFarm Logo" class="logo">
+
+    <h2>Farmer Login</h2>
+    <div class="error" id="error-msg"></div>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="login-btn">Login</button>
+  </div>
+
+  <script>
+    const loginBtn = document.getElementById('login-btn');
+    const errorMsg = document.getElementById('error-msg');
+
+    loginBtn.addEventListener('click', () => {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      fetch('/farmers/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message === 'Login successful') {
+          localStorage.setItem('farmer', JSON.stringify(data.farmer));
+          window.location.href = 'dashboard.html';
+        } else {
+          errorMsg.textContent = data.message;
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        errorMsg.textContent = 'Error connecting to server';
+      });
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,16 @@
+ [
+  
+  {
+    "name": "John Kimani",
+    "username": "johnkimani",
+    "password": "123456",
+    "farm": "Green Valley Farm",
+    "location": "Nairobi",
+    "products": ["Carrots", "Tomatoes"],
+    "contact": {
+      "phone": "0712345678",
+      "email": "johnkimani@example.com"
+    }
+  }
+]
+

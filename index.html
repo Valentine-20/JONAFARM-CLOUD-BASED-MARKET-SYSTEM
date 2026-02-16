@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Farmer Login</title>
+</head>
+<body>
+  <h1>Farmer Login</h1>
+  <form id="login-form">
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+  </form>
+  <script>
+    const form = document.getElementById('login-form');
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      const res = await fetch('/farmers/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if(data.farmer){
+        localStorage.setItem('farmer', JSON.stringify(data.farmer));
+        window.location.href = '/dashboard.html';
+      } else {
+        alert(data.message);
+      }
+    });
+  </script>
+</body>
+</html>

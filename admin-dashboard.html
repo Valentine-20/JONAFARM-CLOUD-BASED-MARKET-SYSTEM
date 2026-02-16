@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard - JonaFarm</title>
+<style>
+body { font-family: Arial; background: #f4f7fb; margin: 0; padding: 0; }
+header { background: #1f3c88; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+header h2 { margin: 0; }
+.main { padding: 20px; }
+table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 30px; }
+th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
+th { background: #1f3c88; color: white; }
+.btn { padding: 6px 10px; border: none; border-radius: 5px; color: white; cursor: pointer; }
+.verify { background: green; }
+.delete { background: red; }
+.status { background: #1f3c88; }
+.add { background: #28a745; margin-bottom: 15px; }
+.update { background: orange; }
+/* Add/Update Product Modal */
+#productForm { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:#00000080; }
+#productForm .form-container { background:white; width:350px; margin:100px auto; padding:20px; border-radius:10px; }
+#productForm input, #productForm input[type="file"] { width: 100%; padding:8px; margin-bottom:10px; }
+#productForm button { width: 48%; margin-right: 2%; }
+
+/* Stats & Reports */
+#stats-container { display:flex; gap:20px; margin-bottom:20px; flex-wrap:wrap; }
+#stats-container div { background:#fff; padding:15px; border-radius:10px; flex:1; text-align:center; min-width:120px; }
+#reports-btn { background:#6c63ff; margin-bottom:15px; }
+</style>
+</head>
+<body>
+
+<header>
+<h2>JonaFarm Admin Dashboard</h2>
+<button class="btn delete" onclick="logout()">Logout</button>
+</header>
+
+<div class="main">
+<h3 id="admin-name"></h3>
+
+<!-- Stats -->
+<h3>Stats</h3>
+<div id="stats-container">
+  <div><h4>Total Products</h4><p id="total-products">0</p></div>
+  <div><h4>Verified Products</h4><p id="verified-products">0</p></div>
+  <div><h4>Total Orders</h4><p id="total-orders">0</p></div>
+  <div><h4>Delivered Orders</h4><p id="delivered-orders">0</p></div>
+  <div><h4>Total Revenue</h4><p id="total-revenue">KSh 0</p></div>
+</div>
+
+<!-- Reports Button -->
+<button class="btn" id="reports-btn" onclick="downloadReports()">Download Reports</button>
+
+<!-- Add Product Button -->
+<button class="btn add" onclick="openForm()">+ Add Product</button>
+
+<h3>Products</h3>
+<table>
+<thead>
+<tr><th>Name</th><th>Price</th><th>Quantity</th><th>Unit</th><th>Status</th><th>Action</th></tr>
+</thead>
+<tbody id="products-body"></tbody>
+</table>
+
+<h3>Orders</h3>
+<table>
+<thead>
+<tr><th>Buyer</th><th>Product</th><th>Quantity</th><th>Status</th></tr>
+</thead>
+<tbody id="orders-body"></tbody>
+</table>
+</div>
+
+<!-- Add / Update Product Modal -->
+<div id="productForm">
+<div class="form-container">
+<h3 id="form-title">Add Product</h3>
+<input id="pname" placeholder="Name">
+<input id="pprice" placeholder="Price">
+<input id="pqty" placeholder="Quantity">
+<input id="punit" placeholder="Unit">
+<input type="file" id="pimage" accept="image/*">
+<button class="btn status" id="save-btn" onclick="saveProduct()">Save</button>
+<button class="btn update" id="update-btn" onclick="updateProduct()">Update</button>
+<button class="btn delete" onclick="closeForm()">Cancel</button>
+</div>
+</div>
+
+<script>
+let currentUpdateId = null;
+
+const admin = JSON.parse(localStorage.getItem('admin'));
+if(!admin) location.href='admin-login.html';
+document.getElementById('admin-name').textContent = "Welcome, " + admin.username;
+
+function openForm(){
+  document.getElementById('productForm').style.display='block';
+  document.getElementById('form-title').textContent='Add Product';
+  document.getElementById('save-btn').style.display='inline-block';
+  document.getElementById('update-btn').style.display='none';
+  currentUpdateId = null;
+  clearForm();
+}
+function closeForm(){ document.getElementById('productForm').style.display='none'; }
+
+function clearForm(){
+  document.getElementById('pname').value='';
+  document.getElementById('pprice').value='';
+  document.getElementById('pqty').value='';
+  document.getElementById('punit').value='';
+  document.getElementById('pimage').value='';
+}
+
+// ----------------------
+// Products Functions
+// ----------------------
+async function loadProducts(){
+  const res = await fetch('/products');
+  const products = await res.json();
+  window.productsList = products; // store globally
+  const tbody = document.getElementById('products-body');
+  tbody.innerHTML = '';
+
+  products.forEach(p=>{
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${p.name}</td>
+      <td>${p.price_ksh}</td>
+      <td>${p.quantity}</td>
+      <td>${p.unit || '-'}</td>
+      <td>${p.verified ? '✅ Verified' : '❌ Not Verified'}</td>
+      <td>
+        ${!p.verified ? `<button class='btn verify' onclick="verifyProduct('${p.name}')">Verify</button>` : ''}
+        <button class='btn update' onclick="editProduct(${p.id})">Update</button>
+        <button class='btn delete' onclick="deleteProduct(${p.id})">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+async function verifyProduct(name){
+  const res = await fetch('/products/verify', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ name })
+  });
+  const data = await res.json();
+  alert(data.message);
+  loadProducts();
+}
+
+async function deleteProduct(id){
+  const res = await fetch('/products/' + id, { method: 'DELETE' });
+  const data = await res.json();
+  alert(data.message);
+  loadProducts();
+}
+
+// ----------------------
+// Add Product
+// ----------------------
+async function saveProduct(){
+  const name = document.getElementById('pname').value.trim();
+  const price_ksh = document.getElementById('pprice').value.trim();
+  const quantity = document.getElementById('pqty').value.trim();
+  const unit = document.getElementById('punit').value.trim();
+  const imageInput = document.getElementById('pimage');
+  const imageFile = imageInput.files[0];
+
+  if(!name || !price_ksh || !quantity || !unit || !imageFile){
+    alert("Please fill all fields and select an image!");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onloadend = async () => {
+    const imageData = reader.result;
+    try {
+      const res = await fetch('/products/add',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ name, price_ksh:Number(price_ksh), quantity:Number(quantity), unit, image:imageData })
+      });
+      const data = await res.json();
+      if(res.ok){
+        alert(data.message);
+        closeForm();
+        loadProducts();
+        loadStats();
+      } else alert(data.message || 'Error saving product');
+    } catch(err){
+      console.error(err);
+      alert('Server error, check console.');
+    }
+  };
+  reader.readAsDataURL(imageFile);
+}
+
+// ----------------------
+// Edit / Update Product
+// ----------------------
+function editProduct(id){
+  currentUpdateId = id;
+  const product = window.productsList.find(p => p.id === id);
+  if(!product) return alert('Product not found');
+  document.getElementById('pname').value = product.name;
+  document.getElementById('pprice').value = product.price_ksh;
+  document.getElementById('pqty').value = product.quantity;
+  document.getElementById('punit').value = product.unit;
+  document.getElementById('productForm').style.display='block';
+  document.getElementById('form-title').textContent='Update Product';
+  document.getElementById('save-btn').style.display='none';
+  document.getElementById('update-btn').style.display='inline-block';
+}
+
+async function updateProduct(){
+  if(!currentUpdateId) return;
+  const name = document.getElementById('pname').value.trim();
+  const price_ksh = document.getElementById('pprice').value.trim();
+  const quantity = document.getElementById('pqty').value.trim();
+  const unit = document.getElementById('punit').value.trim();
+  const imageInput = document.getElementById('pimage');
+  const imageFile = imageInput.files[0];
+
+  const sendUpdate = async (imageData) => {
+    try{
+      const res = await fetch('/products/update/' + currentUpdateId, {
+        method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ name, price_ksh:Number(price_ksh), quantity:Number(quantity), unit, image:imageData })
+      });
+      const data = await res.json();
+      if(res.ok){
+        alert(data.message);
+        closeForm();
+        loadProducts();
+        loadStats();
+      } else alert(data.message || 'Error updating product');
+    } catch(err){
+      console.error(err);
+      alert('Server error, check console.');
+    }
+  };
+
+  if(imageFile){
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      await sendUpdate(reader.result);
+    };
+    reader.readAsDataURL(imageFile);
+  } else {
+    await sendUpdate(null);
+  }
+}
+
+// ----------------------
+// Orders Functions
+// ----------------------
+async function loadOrders(){
+  const res = await fetch('/orders');
+  const orders = await res.json();
+  const tbody = document.getElementById('orders-body');
+  tbody.innerHTML = '';
+  orders.forEach(o=>{
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${o.buyer}</td><td>${o.product}</td><td>${o.quantity}</td><td>${o.status}</td>`;
+    tbody.appendChild(row);
+  });
+  loadStats(); // update stats whenever orders reload
+}
+
+// ----------------------
+// Stats Functions
+// ----------------------
+async function loadStats(){
+  try {
+    const productsRes = await fetch('/products');
+    const products = await productsRes.json();
+
+    const ordersRes = await fetch('/orders');
+    const orders = await ordersRes.json();
+
+    const totalProducts = products.length;
+    const verifiedProducts = products.filter(p => p.verified).length;
+    const totalOrders = orders.length;
+    const deliveredOrders = orders.filter(o => o.status === 'Delivered').length;
+    const totalRevenue = orders.reduce((sum, o) => {
+      const prod = products.find(p => p.name === o.product);
+      const price = prod ? Number(prod.price_ksh) : 0;
+      return sum + (price * o.quantity);
+    }, 0);
+
+    document.getElementById('total-products').textContent = totalProducts;
+    document.getElementById('verified-products').textContent = verifiedProducts;
+    document.getElementById('total-orders').textContent = totalOrders;
+    document.getElementById('delivered-orders').textContent = deliveredOrders;
+    document.getElementById('total-revenue').textContent = 'KSh ' + totalRevenue;
+  } catch(err){ console.error('Error loading stats:', err); }
+}
+
+// ----------------------
+// Reports Functions
+// ----------------------
+async function downloadReports(){
+  try{
+    const productsRes = await fetch('/products');
+    const products = await productsRes.json();
+    const ordersRes = await fetch('/orders');
+    const orders = await ordersRes.json();
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Products Report\nName,Price,Quantity,Unit,Verified\n";
+    products.forEach(p=> csvContent += `${p.name},${p.price_ksh},${p.quantity},${p.unit},${p.verified}\n`);
+
+    csvContent += "\nOrders Report\nBuyer,Product,Quantity,Status\n";
+    orders.forEach(o=> csvContent += `${o.buyer},${o.product},${o.quantity},${o.status}\n`);
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "jonafarm_reports.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+  } catch(err){ console.error(err); alert('Error generating report'); }
+}
+
+// ----------------------
+// Logout
+// ----------------------
+function logout(){ localStorage.removeItem('admin'); location.href='admin-login.html'; }
+
+// ----------------------
+// Init
+// ----------------------
+async function init(){
+  const res = await fetch('/products');
+  window.productsList = await res.json();
+  loadProducts();
+  loadOrders();
+  loadStats();
+}
+init();
+</script>
+
+</body>
+</html>

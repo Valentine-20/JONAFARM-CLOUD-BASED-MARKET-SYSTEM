@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Distributor Login - JonaFarm</title>
+<style>
+body { font-family: Arial, sans-serif; background-color: #f5f5dc; display: flex; justify-content: center; align-items: center; height: 100vh; }
+.login-container { background-color: #fff8f0; padding: 30px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); width: 300px; text-align: center; }
+h2 { margin-bottom: 20px; color: #8b4513; }
+input { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; }
+button { width: 100%; padding: 10px; background-color: #d2691e; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+button:hover { background-color: #8b4513; }
+img { height: 60px; margin-bottom: 15px; }
+</style>
+</head>
+<body>
+
+<div class="login-container">
+  <img src="logo.png" alt="JonaFarm Logo">
+  <h2>Distributor Login</h2>
+  <input type="text" id="username" placeholder="Username" />
+  <input type="password" id="password" placeholder="Password" />
+  <button id="loginBtn">Login</button>
+</div>
+
+<script>
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  if (!username || !password) return alert('Enter username and password');
+
+  try {
+    const res = await fetch('/distributors/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.distributor) {
+      localStorage.setItem('distributor', JSON.stringify(data.distributor));
+      window.location.href = 'distributor.html';
+    } else {
+      alert(data.message || 'Login failed');
+    }
+  } catch(err) {
+    console.error(err);
+    alert('Server error. Try again later.');
+  }
+});
+</script>
+
+</body>
+</html>
+
+
+
+
+
+

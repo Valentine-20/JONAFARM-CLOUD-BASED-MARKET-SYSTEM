@@ -1,0 +1,33 @@
+{
+  "name": "john-farm-market",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "ethers": "^6.16.0",
+    "express": "^4.22.1",
+    "express-session": "^1.18.2",
+    "ipfs-http-client": "^60.0.1",
+    "mongoose": "^9.2.1",
+    "multer": "^1.4.5-lts.1",
+    "sqlite3": "^5.1.7"
+  },
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Valentine-20/jonafarm.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Valentine-20/jonafarm/issues"
+  },
+  "homepage": "https://github.com/Valentine-20/jonafarm#readme"
+}
