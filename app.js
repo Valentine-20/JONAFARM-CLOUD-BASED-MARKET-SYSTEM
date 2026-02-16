@@ -10,11 +10,13 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
+const __dirname = path.resolve();
+
 // ---------------------------
 // MIDDLEWARE
 // ---------------------------
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
   secret: 'john-farm-secret',
@@ -25,21 +27,18 @@ app.use(session({
 // ---------------------------
 // FILE PATHS
 // ---------------------------
-const productsFile = path.join('data', 'products.json');
-const farmersFile = path.join('data', 'farmers.json');
-const ordersFile = path.join('data', 'orders.json');
-const usersFile = path.join('data', 'users.json');
-const distributorsFile = path.join('data', 'distributors.json');
-const adminsFile = path.join('data', 'admins.json');
-const productBlockchainFile = path.join('data', 'productBlockchain.json');
+const productsFile = path.join(__dirname, 'data', 'products.json');
+const farmersFile = path.join(__dirname, 'data', 'farmers.json');
+const ordersFile = path.join(__dirname, 'data', 'orders.json');
+const usersFile = path.join(__dirname, 'data', 'users.json');
+const distributorsFile = path.join(__dirname, 'data', 'distributors.json');
+const adminsFile = path.join(__dirname, 'data', 'admins.json');
+const productBlockchainFile = path.join(__dirname, 'data', 'productBlockchain.json');
 
-// ---------------------------
-// ROOT ROUTE
-// ---------------------------
-// Root route moved to static
-// app.get('/', (req, res) => {
-//   res.send('🚜 JonaFarm Market API is running!');
-// });
+// Root route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // ---------------------------
 // PRODUCTS ROUTES
@@ -55,7 +54,7 @@ app.get('/products', (req, res) => {
 
 app.post('/products/add', (req, res) => {
   const { name, price_ksh, quantity, unit, image } = req.body;
-  if(!name || !price_ksh || !quantity || !unit || !image){
+  if (!name || !price_ksh || !quantity || !unit || !image) {
     return res.status(400).json({ message: 'All fields required' });
   }
 
@@ -77,7 +76,7 @@ app.post('/products/add', (req, res) => {
     createProductBlock({ action: 'Add Product', product: newProduct });
 
     res.status(201).json({ message: 'Product added successfully', product: newProduct });
-  } catch(err){
+  } catch (err) {
     res.status(500).json({ message: 'Error adding product', error: err.message });
   }
 });
@@ -87,7 +86,7 @@ app.post('/products/verify', (req, res) => {
   try {
     const products = fs.existsSync(productsFile) ? JSON.parse(fs.readFileSync(productsFile, 'utf-8')) : [];
     const product = products.find(p => p.name === name);
-    if(!product) return res.status(404).json({ message: 'Product not found' });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
 
     product.verified = true;
     fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
@@ -96,7 +95,7 @@ app.post('/products/verify', (req, res) => {
     createProductBlock({ action: 'Verify Product', product: product.name });
 
     res.json({ message: 'Product verified successfully', product });
-  } catch(err){
+  } catch (err) {
     res.status(500).json({ message: 'Error verifying product', error: err.message });
   }
 });
@@ -106,7 +105,7 @@ app.delete('/products/:id', (req, res) => {
   try {
     const products = fs.existsSync(productsFile) ? JSON.parse(fs.readFileSync(productsFile, 'utf-8')) : [];
     const index = products.findIndex(p => p.id === id);
-    if(index === -1) return res.status(404).json({ message: 'Product not found' });
+    if (index === -1) return res.status(404).json({ message: 'Product not found' });
     const removed = products.splice(index, 1)[0];
     fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
 
@@ -114,7 +113,7 @@ app.delete('/products/:id', (req, res) => {
     createProductBlock({ action: 'Delete Product', product: removed.name });
 
     res.json({ message: 'Product deleted successfully' });
-  } catch(err){
+  } catch (err) {
     res.status(500).json({ message: 'Error deleting product', error: err.message });
   }
 });
@@ -126,13 +125,13 @@ app.patch('/products/update/:id', (req, res) => {
   try {
     const products = fs.existsSync(productsFile) ? JSON.parse(fs.readFileSync(productsFile, 'utf-8')) : [];
     const product = products.find(p => p.id === id);
-    if(!product) return res.status(404).json({ message: 'Product not found' });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
 
     product.name = name || product.name;
     product.price_ksh = price_ksh || product.price_ksh;
     product.quantity = quantity || product.quantity;
     product.unit = unit || product.unit;
-    if(image) product.image = image;
+    if (image) product.image = image;
 
     fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
 
@@ -140,7 +139,7 @@ app.patch('/products/update/:id', (req, res) => {
     createProductBlock({ action: 'Update Product', product: product.name });
 
     res.json({ message: 'Product updated successfully', product });
-  } catch(err){
+  } catch (err) {
     res.status(500).json({ message: 'Error updating product', error: err.message });
   }
 });
@@ -244,7 +243,7 @@ app.post('/users/login', (req, res) => {
 // ---------------------------
 app.post('/orders/place', (req, res) => {
   const { product, quantity, buyer, phone, address, farmer, order_date } = req.body;
-  if (!product || !quantity || !buyer || !phone || !address || !farmer) 
+  if (!product || !quantity || !buyer || !phone || !address || !farmer)
     return res.status(400).json({ message: 'Missing required fields' });
   try {
     const orders = fs.existsSync(ordersFile) ? JSON.parse(fs.readFileSync(ordersFile, 'utf-8')) : [];
@@ -272,7 +271,7 @@ app.get('/orders', (req, res) => {
   try {
     const orders = fs.existsSync(ordersFile) ? JSON.parse(fs.readFileSync(ordersFile, 'utf-8')) : [];
     res.json(orders);
-  } catch(err){
+  } catch (err) {
     res.status(500).json({ message: 'Error reading orders', error: err.message });
   }
 });
@@ -283,7 +282,7 @@ app.get('/orders/farmer/:farmer', (req, res) => {
     const orders = fs.existsSync(ordersFile) ? JSON.parse(fs.readFileSync(ordersFile, 'utf-8')) : [];
     const farmerOrders = orders.filter(o => o.farmer === farmerName);
     res.json(farmerOrders);
-  } catch(err){
+  } catch (err) {
     res.status(500).json({ message: 'Error reading orders for farmer', error: err.message });
   }
 });
@@ -292,7 +291,7 @@ app.get('/orders/distributor', (req, res) => {
   try {
     const orders = fs.existsSync(ordersFile) ? JSON.parse(fs.readFileSync(ordersFile, 'utf-8')) : [];
     res.json(orders);
-  } catch(err){
+  } catch (err) {
     res.status(500).json({ message: 'Error reading orders for distributor', error: err.message });
   }
 });
@@ -308,7 +307,7 @@ app.post('/orders/distributor/update', (req, res) => {
     order.distributor = distributor;
     fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
     res.json({ message: 'Order status updated successfully', order });
-  } catch(err){
+  } catch (err) {
     res.status(500).json({ message: 'Error updating order', error: err.message });
   }
 });
