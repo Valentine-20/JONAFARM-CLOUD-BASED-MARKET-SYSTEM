@@ -1,0 +1,10 @@
+[
+    {
+  "name": "John Doe",
+  "phone": "0712345678",
+  "email": "john00@gmail.com",
+  "password": "123456",
+  "role": "buyer",
+  "status": "Active"
+}
+]

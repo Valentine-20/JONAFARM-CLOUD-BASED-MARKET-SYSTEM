@@ -36,9 +36,10 @@ const productBlockchainFile = path.join('data', 'productBlockchain.json');
 // ---------------------------
 // ROOT ROUTE
 // ---------------------------
-app.get('/', (req, res) => {
-  res.send('🚜 JonaFarm Market API is running!');
-});
+// Root route moved to static
+// app.get('/', (req, res) => {
+//   res.send('🚜 JonaFarm Market API is running!');
+// });
 
 // ---------------------------
 // PRODUCTS ROUTES

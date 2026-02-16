@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JonaFarm Market - Products</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5dc;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #8b4513;
+    }
+    #products {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .product-card {
+      background-color: #fff8f0;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 15px;
+      width: 200px;
+      text-align: center;
+      position: relative;
+    }
+    .product-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+      display: block;
+    }
+    .product-card button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #a0522d;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .product-card button:hover {
+      background-color: #8b4513;
+    }
+    #cart {
+      background-color: #fff8f0;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background-color: #a0522d;
+      color: white;
+      border-radius: 5px;
+    }
+    .remove-btn {
+      background-color: #ff4d4d;
+      border-radius: 5px;
+      padding: 5px 8px;
+      cursor: pointer;
+      color: white;
+      border: none;
+    }
+    .remove-btn:hover {
+      background-color: #cc0000;
+    }
+
+    /* ---- Overlay Harvest Info ---- */
+    .harvest-btn-overlay {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: rgba(210,105,30,0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      padding: 6px 9px;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 10;
+    }
+    .harvest-btn-overlay:hover {
+      background-color: rgba(139,69,19,0.9);
+    }
+    .harvest-info-overlay {
+      display: none;
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      right: 5px;
+      background-color: rgba(255,243,224,0.95);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 13px;
+      color: #4b2e2e;
+      z-index: 9;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>JonaFarm Market</h1>
+
+  <div id="products"></div>
+
+  <h2 style="text-align:center;">Your Cart</h2>
+  <div id="cart"></div>
+
+  <!-- --------------------------
+       NEW SCRIPT FOR API INTEGRATION
+       -------------------------- -->
+  <script>
+    // -----------------------------
+    // Fetch products from your JSON "API"
+    // -----------------------------
+    async function fetchProducts() {
+      try {
+        const res = await fetch('/api/products'); // points to products.js/api
+        if(!res.ok) throw new Error('Failed to fetch products');
+        const products = await res.json();
+        return products;
+      } catch(err) {
+        console.error(err);
+        return [];
+      }
+    }
+
+    // -----------------------------
+    // Load Products into page
+    // -----------------------------
+    async function loadProducts() {
+      const products = await fetchProducts();
+      const container = document.getElementById('products');
+      container.innerHTML = '';
+
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+
+        card.innerHTML = `
+          <div style="position: relative;">
+            <img src="${p.image}" alt="${p.name}">
+            <button class="harvest-btn-overlay">⋮</button>
+            <div class="harvest-info-overlay">
+              Last Harvest: ${p.lastHarvestDate || 'N/A'} <br>
+              Next Harvest: ${p.nextHarvestDate || 'N/A'}
+            </div>
+          </div>
+          <h3>${p.name}</h3>
+          <p>Price: Ksh ${p.price_ksh}</p>
+          <p>Available: ${p.quantity} ${p.unit}</p>
+          <p>Verified: ${p.verified ? '✅' : '❌'}</p>
+          <button onclick="addToCart('${p.name}')">Add to Cart</button>
+        `;
+
+        const harvestBtn = card.querySelector('.harvest-btn-overlay');
+        const harvestInfo = card.querySelector('.harvest-info-overlay');
+        harvestBtn.addEventListener('click', () => {
+          harvestInfo.style.display = harvestInfo.style.display === 'block' ? 'none' : 'block';
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // -----------------------------
+    // Cart Operations
+    // -----------------------------
+    async function addToCart(productName) {
+      const buyer = JSON.parse(localStorage.getItem('buyer')) || { name: 'guest' };
+
+      try {
+        await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product: productName, buyer: buyer.name, quantity: 1, status: 'pending' })
+        });
+        loadCart();
+      } catch(err) { console.error(err); }
+    }
+
+    async function removeFromCart(productName) {
+      try {
+        await fetch('/api/orders/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product: productName })
+        });
+        loadCart();
+      } catch(err) { console.error(err); }
+    }
+
+    async function loadCart() {
+      try {
+        const buyer = JSON.parse(localStorage.getItem('buyer')) || { name: 'guest' };
+        const res = await fetch('/api/orders');
+        const orders = await res.json();
+        const cart = orders.filter(o => o.buyer === buyer.name && o.status === 'pending');
+        const container = document.getElementById('cart');
+
+        if(cart.length === 0) {
+          container.innerHTML = '<p>Your cart is empty.</p>';
+          return;
+        }
+
+        let tableHTML = `<table>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Action</th>
+          </tr>`;
+
+        cart.forEach(item => {
+          tableHTML += `
+            <tr>
+              <td>${item.product}</td>
+              <td>${item.quantity}</td>
+              <td><button class="remove-btn" onclick="removeFromCart('${item.product}')">Remove</button></td>
+            </tr>
+          `;
+        });
+
+        tableHTML += `</table>`;
+        container.innerHTML = tableHTML;
+      } catch(err) { console.error(err); }
+    }
+
+    // -----------------------------
+    // Initial Load
+    // -----------------------------
+    loadProducts();
+    loadCart();
+  </script>
+
+</body>
+</html>
+
+
+
