@@ -199,6 +199,17 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       z-index: 5;
     }
+
+    .verify-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -268,8 +279,20 @@
     function logout() { localStorage.removeItem('farmer'); window.location.href = 'index.html'; }
 
     function toggleMenu(pName) {
-      const info = document.getElementById('info-' + pName);
+      const sanitizedId = 'info-' + pName.replace(/\s+/g, '-');
+      const info = document.getElementById(sanitizedId);
       info.style.display = (info.style.display === 'block') ? 'none' : 'block';
+    }
+
+    async function verifyProduct(name) {
+      if (confirm(`Verify ${name}?`)) {
+        const res = await fetch('/products/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        if (res.ok) loadData();
+      }
     }
 
     async function loadData() {
@@ -284,7 +307,7 @@
         card.className = 'product-card';
         card.innerHTML = `
         <div class="menu-dots" onclick="toggleMenu('${p.name.replace(/'/g, "\\'")}')">⋮</div>
-        <div class="harvest-info" id="info-${p.name}">
+        <div class="harvest-info" id="info-${p.name.replace(/\s+/g, '-')}">
           Last Harvest: 2026-01-10<br>
           Next Harvest: 2026-02-10
         </div>
@@ -292,7 +315,8 @@
         <h4>${p.name}</h4>
         <p>Price: KSh ${p.price_ksh} per ${p.unit}</p>
         <p>Quantity: ${p.quantity} ${p.unit}</p>
-        <div class="status-line">Status: <span class="status-verified">✅ Verified</span></div>
+        <div class="status-line">Status: <span class="status-verified">${p.verified ? '✅ Verified' : 'Not Verified'}</span></div>
+        ${!p.verified ? `<button class="verify-btn" onclick="verifyProduct('${p.name}')">Verify Now</button>` : ''}
       `;
         grid.appendChild(card);
       });
