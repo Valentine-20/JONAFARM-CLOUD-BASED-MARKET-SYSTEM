@@ -4,289 +4,450 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buyer Dashboard - JonaFarm Market</title>
-  <link rel="stylesheet" href="style.css">
+  <title>JonaFarm Market - Buyer</title>
   <style>
-    .cart-float {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background: var(--primary);
-      color: var(--white);
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-      z-index: 100;
+    body {
+      font-family: Arial, sans-serif;
+      background: #fdfae1;
+      margin: 0;
+      padding: 20px;
+      color: #4b2e2e;
     }
 
-    .cart-count {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background: #ff4d4d;
+    .header-banner {
+      background: #8b4513;
       color: white;
-      font-size: 0.75rem;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #modal-cart {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 101;
-    }
-
-    .modal-content {
-      background: var(--white);
-      max-width: 800px;
-      margin: 50px auto;
       padding: 30px;
       border-radius: 20px;
-      max-height: 80vh;
-      overflow-y: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .header-banner h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    .dashboard-title {
+      text-align: center;
+      color: #8b4513;
+      font-size: 28px;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+
+    .instruction-card {
+      background: #fff9e6;
+      border: 1px solid #eee;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 800px;
+      margin: 0 auto 40px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .instruction-card h3 {
+      color: #8b4513;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    .instruction-card ol {
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.6;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto 50px;
+    }
+
+    .product-card {
+      background: #fff9e6;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 15px;
+      margin-bottom: 15px;
+    }
+
+    .product-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 20px;
+    }
+
+    .product-card p {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+
+    .verified-span {
+      color: #155724;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin: 10px 0;
+    }
+
+    .blockchain-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .add-to-cart-btn {
+      background: #8b4513;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+      width: 100%;
+    }
+
+    .section-container {
+      max-width: 800px;
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+
+    .section-container h2 {
+      color: #8b4513;
+      margin-bottom: 25px;
+    }
+
+    .cart-table-container {
+      background: #fff9e6;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 50px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #8b4513;
+      color: white;
+      padding: 12px;
+    }
+
+    td {
+      padding: 12px;
+      border: 1px solid #d2691e;
+      text-align: center;
+    }
+
+    .total-row {
+      background: #8b4513;
+      color: white;
+      font-weight: bold;
+    }
+
+    .remove-btn {
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .order-form {
+      background: #fff9e6;
+      padding: 40px;
+      border-radius: 15px;
+      margin-bottom: 50px;
+    }
+
+    .order-form input,
+    .order-form textarea {
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    .order-form textarea {
+      height: 100px;
+    }
+
+    .place-order-btn {
+      background: #8b4513;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 10px;
+      width: 100%;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .payment-instructions {
+      background: #fff9e6;
+      padding: 40px;
+      border-radius: 15px;
+      text-align: left;
+      line-height: 1.8;
+    }
+
+    .payment-instructions h3 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #8b4513;
+    }
+
+    .pay-btn {
+      background: #8b4513;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 10px;
+      width: 100%;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .farmer-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin: 5px 0;
+    }
+
+    .farmer-info span {
+      color: #ff4d4d;
     }
   </style>
 </head>
 
-<body class="dashboard-grid">
+<body>
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <img src="JonaFarm-logo.png" alt="Logo" width="40">
-      <h2 style="font-size: 1.2rem;">JonaFarm</h2>
-    </div>
-    <nav class="sidebar-nav">
-      <a href="#" class="nav-item active">🛒 Marketplace</a>
-      <a href="#" class="nav-item">📜 My Orders</a>
-      <a href="#" class="nav-item">👤 Profile</a>
-    </nav>
-    <button class="btn btn-outline" style="color: white; border-color: white; margin-top: auto;"
-      onclick="logout()">Logout</button>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <header class="top-bar">
-      <div>
-        <h2>Fresh from the Farm</h2>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Direct access to quality produce with blockchain
-          verification.</p>
-      </div>
-      <div id="user-info" style="font-weight: 600; color: var(--primary);"></div>
-    </header>
-
-    <!-- Product Grid -->
-    <div class="portal-container" id="products"
-      style="margin: 0; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
-      <!-- Products inserted by JS -->
-    </div>
-
-    <!-- Checkout Section (Hidden until order check) -->
-    <div id="checkout-section" style="display: none; margin-top: 40px;">
-      <h3 style="margin-bottom: 20px; color: var(--primary);">Complete Your Order</h3>
-      <div class="stat-card" style="max-width: 600px;">
-        <div id="order-form">
-          <input type="text" id="buyer-name" placeholder="Your Name" class="nav-item"
-            style="width: 100%; background: #f0f0f0; color: #333; margin-bottom: 10px;" required>
-          <input type="text" id="buyer-phone" placeholder="Phone Number" class="nav-item"
-            style="width: 100%; background: #f0f0f0; color: #333; margin-bottom: 10px;" required>
-          <textarea id="buyer-address" placeholder="Delivery Address" class="nav-item"
-            style="width: 100%; background: #f0f0f0; color: #333; margin-bottom: 20px; height: 80px;"
-            required></textarea>
-          <button class="btn btn-primary" style="width: 100%;" id="place-order-btn">Confirm Order</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Payment Info (Modal or Section) -->
-    <div id="payment-section" style="display: none; margin-top: 20px;">
-      <div class="stat-card" style="border: 2px solid var(--primary); max-width: 600px;">
-        <h3 style="color: var(--primary); margin-bottom: 15px;">Payment Instructions</h3>
-        <div id="payment-details" style="margin-bottom: 20px; font-size: 0.95rem;"></div>
-        <button class="btn btn-primary" style="width: 100%;" onclick="confirmPayment()">I Have Paid</button>
-      </div>
-    </div>
-  </main>
-
-  <!-- Cart Floating Button -->
-  <div class="cart-float" onclick="toggleCart()">
-    🛒
-    <div class="cart-count" id="cart-count">0</div>
+  <div class="header-banner">
+    <img src="JonaFarm-logo.png" alt="Logo" width="40">
+    <h1>Welcome to Green Valley Farm</h1>
   </div>
 
-  <!-- Cart Modal -->
-  <div id="modal-cart" onclick="if(event.target === this) toggleCart()">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 20px; color: var(--primary);">Your Shopping Cart</h3>
-      <div class="table-container" id="cart-container">
-        <!-- Cart items here -->
-      </div>
-      <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <h4 id="cart-total">Total: KSh 0</h4>
-        <div style="display: flex; gap: 10px;">
-          <button class="btn btn-outline" onclick="toggleCart()">Continue Shopping</button>
-          <button class="btn btn-primary" onclick="proceedToCheckout()">Checkout</button>
-        </div>
-      </div>
+  <div class="dashboard-title">Buyer Dashboard</div>
+
+  <div class="instruction-card">
+    <h3>How to Order</h3>
+    <ol>
+      <li>Browse products and add items to your cart.</li>
+      <li>Fill in your name, phone number, and delivery address below.</li>
+      <li>Click Place Order — payment instructions will appear below.</li>
+      <li>Pay the farmer using the number provided.</li>
+      <li>Click I Have Paid to confirm your order.</li>
+      <li>Our distributor will contact you to arrange delivery.</li>
+    </ol>
+  </div>
+
+  <div class="products-grid" id="products-grid">
+    <!-- Loaded via JS -->
+  </div>
+
+  <div id="cart-section" style="display: none;">
+    <div class="section-container">
+      <h2>Your Cart</h2>
+    </div>
+    <div class="cart-table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th>Farmer</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="cart-body"></tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="3">Total</td>
+            <td colspan="3" id="cart-total">0</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div id="order-section" style="display: none;">
+    <div class="section-container">
+      <h2>Place Order</h2>
+    </div>
+    <div class="order-form">
+      <input id="buyer-name" placeholder="Name">
+      <input id="buyer-phone" placeholder="Phone Number">
+      <textarea id="buyer-address" placeholder="Delivery Address"></textarea>
+      <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
+    </div>
+  </div>
+
+  <div id="payment-section" style="display: none;">
+    <div class="payment-instructions">
+      <h3>Payment Instructions</h3>
+      <div id="payment-details"></div>
+      <button class="pay-btn" onclick="confirmPayment()">I Have Paid</button>
     </div>
   </div>
 
   <script>
     let cart = [];
     const loggedBuyer = JSON.parse(localStorage.getItem('buyer'));
-    if (!loggedBuyer) {
-      window.location.href = 'buyer-login.html';
-    } else {
-      document.getElementById('user-info').textContent = loggedBuyer.name;
+    if (loggedBuyer) {
       document.getElementById('buyer-name').value = loggedBuyer.name;
       document.getElementById('buyer-phone').value = loggedBuyer.phone || '';
-    }
-
-    function logout() {
-      localStorage.removeItem('buyer');
-      window.location.href = 'index.html';
     }
 
     async function loadProducts() {
       const res = await fetch('/products');
       const products = await res.json();
-      const container = document.getElementById('products');
-      container.innerHTML = '';
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = '';
 
       products.forEach(p => {
         const card = document.createElement('div');
-        card.className = 'role-card';
-        card.style.padding = '20px';
+        card.className = 'product-card';
         card.innerHTML = `
-                    <img src="${p.image}" alt="${p.name}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 15px;">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 5px;">${p.name}</h3>
-                    <p style="color: var(--primary); font-weight: 700; margin-bottom: 10px;">KSh ${p.price_ksh} / ${p.unit}</p>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">
-                        Farmer: ${p.farmer_name || 'JonaFarm Member'}<br>
-                        Available: ${p.quantity} ${p.unit}
-                    </p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <span class="badge ${p.verified ? 'badge-success' : 'badge-warning'}">${p.verified ? 'Verified' : 'Pending'}</span>
-                        <button class="btn btn-primary" style="padding: 8px 15px;" onclick="addToCart('${p.name}', ${p.price_ksh}, '${p.farmer_name || 'John'}', '${p.farmer_contact || '0712345678'}')">Add</button>
-                    </div>
-                `;
-        container.appendChild(card);
+        <img src="${p.image}" alt="${p.name}">
+        <h3>${p.name}</h3>
+        <p>Price: KSh ${p.price_ksh}</p>
+        <p>Available: ${p.quantity} ${p.unit}</p>
+        <div class="verified-span">
+          Verified: ✅ <button class="blockchain-btn" onclick="viewBlockchain('${p.name}')">View Blockchain</button>
+        </div>
+        <div class="farmer-info">
+          Farmer: ${p.farmer_name || 'John Kimani'} <span>📞</span> ${p.farmer_contact || '0712345673'}
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart('${p.name}', ${p.price_ksh}, '${p.farmer_name || 'John Kimani'}', '${p.farmer_contact || '0712345673'}')">Add to Cart</button>
+      `;
+        grid.appendChild(card);
       });
     }
 
-    function addToCart(name, price, farmer_name, farmer_contact) {
-      const existing = cart.find(item => item.name === name);
+    function addToCart(name, price, farmer, phone) {
+      const existing = cart.find(i => i.name === name);
       if (existing) existing.quantity++;
-      else cart.push({ name, price_ksh: price, quantity: 1, farmer_name, farmer_contact });
+      else cart.push({ name, price, quantity: 1, farmer, phone });
+
       updateCartUI();
+      document.getElementById('cart-section').style.display = 'block';
+      document.getElementById('order-section').style.display = 'block';
     }
 
     function updateCartUI() {
-      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-      document.getElementById('cart-count').textContent = count;
-
-      const container = document.getElementById('cart-container');
-      if (cart.length === 0) {
-        container.innerHTML = '<p style="padding: 20px; text-align: center;">Your cart is empty.</p>';
-        document.getElementById('cart-total').textContent = 'Total: KSh 0';
-        return;
-      }
-
-      let html = `<table><thead><tr><th>Item</th><th>Price</th><th>Qty</th><th>Subtotal</th><th>Action</th></tr></thead><tbody>`;
+      const tbody = document.getElementById('cart-body');
+      tbody.innerHTML = '';
       let total = 0;
+
       cart.forEach(item => {
-        const sub = item.price_ksh * item.quantity;
+        const sub = item.price * item.quantity;
         total += sub;
-        html += `<tr>
-                    <td>${item.name}<br><small>${item.farmer_name}</small></td>
-                    <td>${item.price_ksh}</td>
-                    <td>${item.quantity}</td>
-                    <td>${sub}</td>
-                    <td><button class="badge badge-danger" style="border:none; cursor:pointer;" onclick="removeFromCart('${item.name}')">Remove</button></td>
-                </tr>`;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.price}</td>
+        <td>${item.quantity}</td>
+        <td>${sub}</td>
+        <td>${item.farmer} 📞 ${item.phone}</td>
+        <td><button class="remove-btn" onclick="removeFromCart('${item.name}')">Remove</button></td>
+      `;
+        tbody.appendChild(tr);
       });
-      html += `</tbody></table>`;
-      container.innerHTML = html;
-      document.getElementById('cart-total').textContent = `Total: KSh ${total}`;
+      document.getElementById('cart-total').textContent = total;
     }
 
     function removeFromCart(name) {
-      cart = cart.filter(item => item.name !== name);
+      cart = cart.filter(i => i.name !== name);
       updateCartUI();
+      if (cart.length === 0) {
+        document.getElementById('cart-section').style.display = 'none';
+        document.getElementById('order-section').style.display = 'none';
+      }
     }
 
-    function toggleCart() {
-      const modal = document.getElementById('modal-cart');
-      modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function proceedToCheckout() {
-      if (cart.length === 0) return alert('Cart is empty');
-      toggleCart();
-      document.getElementById('checkout-section').style.display = 'block';
-      document.getElementById('checkout-section').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    document.getElementById('place-order-btn').addEventListener('click', async () => {
-      const buyerName = document.getElementById('buyer-name').value.trim();
+    async function placeOrder() {
+      const name = document.getElementById('buyer-name').value.trim();
       const phone = document.getElementById('buyer-phone').value.trim();
       const address = document.getElementById('buyer-address').value.trim();
 
-      if (!buyerName || !phone || !address || cart.length === 0) {
-        alert('Please fill all details');
-        return;
-      }
+      if (!name || !phone || !address || cart.length === 0) return alert('Fill all details');
 
-      for (let item of cart) {
-        await fetch('/orders/place', {
+      // Summarize for instructions
+      let total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+      let details = `<p><strong>Order Date:</strong> ${new Date().toISOString()}</p>`;
+      cart.forEach(item => {
+        details += `<p>${item.name} → Farmer: ${item.farmer}, Contact: ${item.phone}, Amount: KSh ${item.price * item.quantity}</p>`;
+
+        // Post to backend
+        fetch('/orders/place', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             product: item.name,
             quantity: item.quantity,
-            buyer: buyerName,
+            buyer: name,
             phone,
             address,
-            farmer: item.farmer_name,
+            farmer: item.farmer,
             order_date: new Date().toISOString(),
             status: 'Pending'
           })
         });
-      }
-
-      let paymentInfo = `<strong>Order Summary:</strong><br><br>`;
-      cart.forEach(item => {
-        paymentInfo += `${item.name} x ${item.quantity} (Farmer: ${item.farmer_name} - ${item.farmer_contact})<br>`;
       });
-      paymentInfo += `<br><strong>Total: KSh ${cart.reduce((sum, i) => sum + i.price_ksh * i.quantity, 0)}</strong><br><br>`;
-      paymentInfo += `Please send payment to the farmer's contact above and click "I Have Paid".`;
 
-      document.getElementById('payment-details').innerHTML = paymentInfo;
+      details += `<p><strong>Total: KSh ${total}</strong></p>`;
+      details += `<p>Buyer Name: ${name}, Phone: ${phone}, Address: ${address}</p>`;
+
+      document.getElementById('payment-details').innerHTML = details;
       document.getElementById('payment-section').style.display = 'block';
-      document.getElementById('checkout-section').style.display = 'none';
-    });
+      document.getElementById('order-section').style.display = 'none';
+    }
 
     function confirmPayment() {
-      alert('Order Confirmed! Thank you for shopping with JonaFarm.');
+      alert('Thank you! Order confirmed.');
       cart = [];
       updateCartUI();
+      document.getElementById('cart-section').style.display = 'none';
       document.getElementById('payment-section').style.display = 'none';
+    }
+
+    function viewBlockchain(name) {
+      location.href = 'farmer-blockchain.html?product=' + encodeURIComponent(name);
     }
 
     loadProducts();
