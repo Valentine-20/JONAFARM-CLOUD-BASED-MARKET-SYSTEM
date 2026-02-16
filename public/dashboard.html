@@ -315,8 +315,8 @@
         <h4>${p.name}</h4>
         <p>Price: KSh ${p.price_ksh} per ${p.unit}</p>
         <p>Quantity: ${p.quantity} ${p.unit}</p>
-        <div class="status-line">Status: <span class="status-verified">${p.verified ? '✅ Verified' : 'Not Verified'}</span></div>
-        ${!p.verified ? `<button class="verify-btn" onclick="verifyProduct('${p.name}')">Verify Now</button>` : ''}
+        <div class="status-line">Status: <span class="status-verified">${p.verified ? '✅ Verified' : '<span style="color: red;">❌ Not Verified</span>'}</span></div>
+        ${!p.verified ? `<button class="verify-btn" style="background-color: #28a745;" onclick="verifyProduct('${p.name}')">Verify Now</button>` : ''}
       `;
         grid.appendChild(card);
       });

@@ -338,9 +338,9 @@
         <td>${p.price_ksh}</td>
         <td>${p.quantity}</td>
         <td>${p.unit || 'kg'}</td>
-        <td><span class="status-verified">${p.verified ? '✅ Verified' : 'Not Verified'}</span></td>
+        <td><span class="status-verified">${p.verified ? '✅ Verified' : '<span style="color: red;">❌ Not Verified</span>'}</span></td>
         <td>
-          ${!p.verified ? `<button class="btn verify-btn" onclick="verifyProduct('${p.name}')">Verify</button>` : ''}
+          ${!p.verified ? `<button class="btn verify-btn" style="background-color: #28a745; margin-right: 5px;" onclick="verifyProduct('${p.name}')">Verify</button>` : ''}
           <button class="btn update-btn" onclick="editProduct(${p.id})">Update</button>
           <button class="btn delete-btn" onclick="deleteProduct(${p.id})">Delete</button>
         </td>
