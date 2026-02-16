@@ -1,36 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Farmer Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JonaFarm Market - Connecting Farmers to the World</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Farmer Login</h1>
-  <form id="login-form">
-    <input type="text" id="username" placeholder="Username" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-  </form>
-  <script>
-    const form = document.getElementById('login-form');
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
 
-      const res = await fetch('/farmers/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      const data = await res.json();
-      if(data.farmer){
-        localStorage.setItem('farmer', JSON.stringify(data.farmer));
-        window.location.href = '/dashboard.html';
-      } else {
-        alert(data.message);
-      }
-    });
-  </script>
+    <section class="hero">
+        <img src="JonaFarm-logo.png" alt="JonaFarm Logo" class="logo-large">
+        <h1>JonaFarm Market</h1>
+        <p>A smart, cloud-based marketplace empowering farmers, distributors, and buyers with transparency and efficiency.</p>
+    </section>
+
+    <div class="portal-container">
+        <a href="login.html" class="role-card">
+            <div class="role-icon">🚜</div>
+            <h3>Farmer Portal</h3>
+            <p>Manage your products, track harvests, and connect with buyers directly.</p>
+        </a>
+
+        <a href="buyer-login.html" class="role-card">
+            <div class="role-icon">🛒</div>
+            <h3>Buyer Portal</h3>
+            <p>Direct access to fresh farm produce with blockchain-backed transparency.</p>
+        </a>
+
+        <a href="distributor-login.html" class="role-card">
+            <div class="role-icon">🚚</div>
+            <h3>Distributor</h3>
+            <p>Join our delivery network and help bridge the gap between farm and table.</p>
+        </a>
+
+        <a href="admin-login.html" class="role-card">
+            <div class="role-icon">🛡️</div>
+            <h3>Admin Panel</h3>
+            <p>Platform management, product verification, and market analytics.</p>
+        </a>
+    </div>
+
+    <footer class="footer">
+        &copy; 2026 JonaFarm Market System. Empowering local agriculture through technology.
+    </footer>
+
 </body>
 </html>
