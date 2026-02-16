@@ -3,14 +3,53 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import session from 'express-session';
-import crypto from 'crypto'; // ES module fixed
+import crypto from 'crypto';
 
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
-
+const PORT = process.env.PORT || 3000;
 const __dirname = path.resolve();
+
+// ---------------------------
+// VERCEL /TMP BYPASS
+// ---------------------------
+// Vercel filesystem is read-only. We move data to /tmp to allow writes.
+const isVercel = process.env.VERCEL === '1';
+const dataBaseDir = isVercel ? '/tmp' : path.join(__dirname, 'data');
+
+// Helper to ensure data files exist in /tmp
+function ensureDataFiles() {
+  const files = [
+    'products.json', 'farmers.json', 'orders.json',
+    'users.json', 'distributors.json', 'admins.json',
+    'productBlockchain.json'
+  ];
+
+  if (!fs.existsSync(dataBaseDir)) fs.mkdirSync(dataBaseDir, { recursive: true });
+
+  files.forEach(file => {
+    const dest = path.join(dataBaseDir, file);
+    if (!fs.existsSync(dest)) {
+      const src = path.join(__dirname, 'data', file);
+      if (fs.existsSync(src)) {
+        fs.copyFileSync(src, dest);
+        console.log(`✅ Seeded ${file} to ${dataBaseDir}`);
+      } else {
+        fs.writeFileSync(dest, '[]');
+      }
+    }
+  });
+}
+ensureDataFiles();
+
+const productsFile = path.join(dataBaseDir, 'products.json');
+const farmersFile = path.join(dataBaseDir, 'farmers.json');
+const ordersFile = path.join(dataBaseDir, 'orders.json');
+const usersFile = path.join(dataBaseDir, 'users.json');
+const distributorsFile = path.join(dataBaseDir, 'distributors.json');
+const adminsFile = path.join(dataBaseDir, 'admins.json');
+const productBlockchainFile = path.join(dataBaseDir, 'productBlockchain.json');
 
 // ---------------------------
 // MIDDLEWARE
@@ -23,17 +62,6 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
-
-// ---------------------------
-// FILE PATHS
-// ---------------------------
-const productsFile = path.join(__dirname, 'data', 'products.json');
-const farmersFile = path.join(__dirname, 'data', 'farmers.json');
-const ordersFile = path.join(__dirname, 'data', 'orders.json');
-const usersFile = path.join(__dirname, 'data', 'users.json');
-const distributorsFile = path.join(__dirname, 'data', 'distributors.json');
-const adminsFile = path.join(__dirname, 'data', 'admins.json');
-const productBlockchainFile = path.join(__dirname, 'data', 'productBlockchain.json');
 
 // Root route
 app.get('/', (req, res) => {
@@ -72,9 +100,7 @@ app.post('/products/add', (req, res) => {
     products.push(newProduct);
     fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
 
-    // Blockchain: record product addition
     createProductBlock({ action: 'Add Product', product: newProduct });
-
     res.status(201).json({ message: 'Product added successfully', product: newProduct });
   } catch (err) {
     res.status(500).json({ message: 'Error adding product', error: err.message });
@@ -91,9 +117,7 @@ app.post('/products/verify', (req, res) => {
     product.verified = true;
     fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
 
-    // Blockchain: record verification
     createProductBlock({ action: 'Verify Product', product: product.name });
-
     res.json({ message: 'Product verified successfully', product });
   } catch (err) {
     res.status(500).json({ message: 'Error verifying product', error: err.message });
@@ -109,9 +133,7 @@ app.delete('/products/:id', (req, res) => {
     const removed = products.splice(index, 1)[0];
     fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
 
-    // Blockchain: record deletion
     createProductBlock({ action: 'Delete Product', product: removed.name });
-
     res.json({ message: 'Product deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Error deleting product', error: err.message });
@@ -134,10 +156,7 @@ app.patch('/products/update/:id', (req, res) => {
     if (image) product.image = image;
 
     fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
-
-    // Blockchain: record update
     createProductBlock({ action: 'Update Product', product: product.name });
-
     res.json({ message: 'Product updated successfully', product });
   } catch (err) {
     res.status(500).json({ message: 'Error updating product', error: err.message });
@@ -145,17 +164,8 @@ app.patch('/products/update/:id', (req, res) => {
 });
 
 // ---------------------------
-// FARMERS ROUTES
+// AUTH ROUTES
 // ---------------------------
-app.get('/farmers', (req, res) => {
-  try {
-    const data = fs.existsSync(farmersFile) ? fs.readFileSync(farmersFile, 'utf-8') : '[]';
-    res.json(JSON.parse(data));
-  } catch (err) {
-    res.status(500).json({ message: 'Error reading farmers file', error: err.message });
-  }
-});
-
 app.post('/farmers/login', (req, res) => {
   const { username, password } = req.body;
   try {
@@ -169,32 +179,21 @@ app.post('/farmers/login', (req, res) => {
   }
 });
 
-// ---------------------------
-// ADMIN ROUTES
-// ---------------------------
 app.post('/admins/login', (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ message: 'Username and password required' });
-
   try {
     const admins = fs.existsSync(adminsFile) ? JSON.parse(fs.readFileSync(adminsFile, 'utf-8')) : [];
     const admin = admins.find(a => a.username === username && a.password === password);
     if (!admin) return res.status(401).json({ message: 'Invalid admin credentials' });
-
     req.session.admin = admin;
     res.json({ message: 'Login successful', admin });
   } catch (err) {
-    console.error('Admin login error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-// ---------------------------
-// DISTRIBUTORS ROUTES
-// ---------------------------
 app.post('/distributors/login', (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ message: 'Username and password required' });
   try {
     const distributors = fs.existsSync(distributorsFile) ? JSON.parse(fs.readFileSync(distributorsFile, 'utf-8')) : [];
     const distributor = distributors.find(d => d.username === username && d.password === password);
@@ -202,14 +201,10 @@ app.post('/distributors/login', (req, res) => {
     req.session.distributor = distributor;
     res.json({ message: 'Login successful', distributor });
   } catch (err) {
-    console.error('Distributor login error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-// ---------------------------
-// USERS ROUTES
-// ---------------------------
 app.post('/users/signup', (req, res) => {
   const { name, phone, email, password } = req.body;
   if (!name || !phone || !email || !password) return res.status(400).json({ message: 'All fields required' });
@@ -257,7 +252,7 @@ app.post('/orders/place', (req, res) => {
       status: 'Pending',
       farmer,
       distributor: '',
-      order_date
+      order_date: order_date || new Date().toISOString()
     };
     orders.push(newOrder);
     fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
@@ -277,10 +272,9 @@ app.get('/orders', (req, res) => {
 });
 
 app.get('/orders/farmer/:farmer', (req, res) => {
-  const farmerName = req.params.farmer;
   try {
     const orders = fs.existsSync(ordersFile) ? JSON.parse(fs.readFileSync(ordersFile, 'utf-8')) : [];
-    const farmerOrders = orders.filter(o => o.farmer === farmerName);
+    const farmerOrders = orders.filter(o => o.farmer === req.params.farmer);
     res.json(farmerOrders);
   } catch (err) {
     res.status(500).json({ message: 'Error reading orders for farmer', error: err.message });
@@ -317,43 +311,37 @@ app.post('/orders/distributor/update', (req, res) => {
 // BLOCKCHAIN FUNCTIONS
 // ---------------------------
 function createProductBlock(action) {
-  let chain = [];
-  if (fs.existsSync(productBlockchainFile)) {
-    chain = JSON.parse(fs.readFileSync(productBlockchainFile, 'utf-8'));
+  try {
+    let chain = [];
+    if (fs.existsSync(productBlockchainFile)) {
+      chain = JSON.parse(fs.readFileSync(productBlockchainFile, 'utf-8'));
+    }
+    const previousHash = chain.length ? chain[chain.length - 1].hash : '0';
+    const index = chain.length + 1;
+    const timestamp = new Date().toISOString();
+    const blockData = { index, timestamp, productAction: action, previousHash };
+    const hash = crypto.createHash('sha256').update(JSON.stringify(blockData)).digest('hex');
+    const newBlock = { ...blockData, hash };
+    chain.push(newBlock);
+    fs.writeFileSync(productBlockchainFile, JSON.stringify(chain, null, 2));
+    return newBlock;
+  } catch (err) {
+    console.error('Error creating block:', err);
   }
-
-  const previousHash = chain.length ? chain[chain.length - 1].hash : '0';
-  const index = chain.length + 1;
-  const timestamp = new Date().toISOString();
-  const blockData = { index, timestamp, productAction: action, previousHash };
-  const hash = crypto.createHash('sha256').update(JSON.stringify(blockData)).digest('hex');
-  const newBlock = { ...blockData, hash };
-
-  chain.push(newBlock);
-  fs.writeFileSync(productBlockchainFile, JSON.stringify(chain, null, 2));
-  return newBlock;
 }
 
-function getProductBlockchain() {
-  if (!fs.existsSync(productBlockchainFile)) return [];
-  return JSON.parse(fs.readFileSync(productBlockchainFile, 'utf-8'));
-}
+app.get('/blockchain/products', (req, res) => {
+  try {
+    const chain = fs.existsSync(productBlockchainFile) ? JSON.parse(fs.readFileSync(productBlockchainFile, 'utf-8')) : [];
+    res.json(chain);
+  } catch (err) {
+    res.status(500).json({ message: 'Error reading product blockchain', error: err.message });
+  }
+});
 
 // ---------------------------
 // START SERVER
 // ---------------------------
 app.listen(PORT, () => {
   console.log(`🚜 JonaFarm Market server running at http://localhost:${PORT}`);
-});
-
-// ---------------------------
-// PRODUCT BLOCKCHAIN ROUTE
-// ---------------------------
-app.get('/blockchain/products', (req, res) => {
-  try {
-    const chain = getProductBlockchain();
-    res.json(chain);
-  } catch (err) {
-    res.status(500).json({ message: 'Error reading product blockchain', error: err.message });
-  }
 });
