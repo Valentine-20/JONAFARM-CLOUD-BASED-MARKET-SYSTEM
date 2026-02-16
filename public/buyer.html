@@ -250,6 +250,46 @@
     .farmer-info span {
       color: #ff4d4d;
     }
+
+    /* 3-Dots Menu */
+    .menu-dots {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #8b4513;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 20px;
+      z-index: 10;
+      transition: 0.3s;
+    }
+
+    .menu-dots:hover {
+      background: #d2691e;
+    }
+
+    .harvest-info {
+      display: none;
+      /* Hidden by default */
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      text-align: left;
+      border: 1px solid #d2691e;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 5;
+    }
   </style>
 </head>
 
@@ -333,6 +373,11 @@
       document.getElementById('buyer-phone').value = loggedBuyer.phone || '';
     }
 
+    function toggleMenu(pName) {
+      const info = document.getElementById('info-' + pName);
+      info.style.display = (info.style.display === 'block') ? 'none' : 'block';
+    }
+
     async function loadProducts() {
       const res = await fetch('/products');
       const products = await res.json();
@@ -343,6 +388,11 @@
         const card = document.createElement('div');
         card.className = 'product-card';
         card.innerHTML = `
+        <div class="menu-dots" onclick="toggleMenu('${p.name.replace(/'/g, "\\'")}')">⋮</div>
+        <div class="harvest-info" id="info-${p.name}">
+          Last Harvest: 2026-01-10<br>
+          Next Harvest: 2026-02-10
+        </div>
         <img src="${p.image}" alt="${p.name}">
         <h3>${p.name}</h3>
         <p>Price: KSh ${p.price_ksh}</p>
