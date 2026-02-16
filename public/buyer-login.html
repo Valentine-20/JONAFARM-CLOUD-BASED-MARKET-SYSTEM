@@ -1,46 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Buyer Login - JonaFarm</title>
   <style>
-    body { font-family: Arial; background: #f5f5dc; display:flex; justify-content:center; align-items:center; height:100vh; }
-    #login-form { background:#fff8f0; padding:20px; border-radius:15px; box-shadow:0 4px 8px rgba(0,0,0,0.1); width:300px; }
-    input, button { width:100%; margin:10px 0; padding:10px; border-radius:8px; border:1px solid #ccc; }
-    button { background:#a0522d; color:white; border:none; cursor:pointer; }
-    button:hover{ background:#8b4513; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #fdfae1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .form-box {
+      background: #fff8f0;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 350px;
+      text-align: center;
+    }
+
+    .logo {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #8b4513;
+      margin-bottom: 30px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #8b4513;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #d2691e;
+    }
+
+    p {
+      margin-top: 20px;
+      color: #4b2e2e;
+    }
+
+    a {
+      color: #8b4513;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .error {
+      color: #ff0000;
+      font-size: 14px;
+      margin-bottom: 15px;
+      display: none;
+    }
   </style>
 </head>
+
 <body>
-  <div id="login-form">
+  <div class="form-box">
+    <img src="JonaFarm-logo.png" alt="Logo" class="logo">
     <h2>Buyer Login</h2>
-    <input type="email" id="email" placeholder="Email" required>
+    <div id="error-msg" class="error"></div>
+    <input type="email" id="email" placeholder="Email Address" required>
     <input type="password" id="password" placeholder="Password" required>
     <button id="login-btn">Login</button>
     <p>Don't have an account? <a href="buyer-signup.html">Sign Up</a></p>
   </div>
 
   <script>
-    document.getElementById('login-btn').addEventListener('click', () => {
+    document.getElementById('login-btn').addEventListener('click', async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
-      if(!email||!password){ alert('Fill all fields'); return; }
+      const errorDiv = document.getElementById('error-msg');
 
-      let users=JSON.parse(localStorage.getItem('users'))||[];
-      const user=users.find(u=>u.email===email&&u.password===password);
-      if(!user){ alert('Invalid email or password'); return; }
+      if (!email || !password) {
+        errorDiv.textContent = 'Please fill all fields';
+        errorDiv.style.display = 'block';
+        return;
+      }
 
-      if(user.role==='buyer'){ localStorage.setItem('buyer', JSON.stringify(user)); window.location.href='buyer.html'; }
-      else if(user.role==='farmer'){ localStorage.setItem('farmer', JSON.stringify(user)); window.location.href='farmer.html'; }
-      else{ alert('Unknown role'); return; }
+      try {
+        const res = await fetch('/users/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('buyer', JSON.stringify(data.user));
+          window.location.href = 'buyer.html';
+        } else {
+          errorDiv.textContent = data.message || 'Login failed';
+          errorDiv.style.display = 'block';
+        }
+      } catch (err) {
+        console.error(err);
+        errorDiv.textContent = 'Error connecting to server';
+        errorDiv.style.display = 'block';
+      }
     });
   </script>
 </body>
+
 </html>
-
-
-
-
-
-
