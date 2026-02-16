@@ -1,417 +1,296 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JonaFarm Market - Buyer Dashboard</title>
+  <title>Buyer Dashboard - JonaFarm Market</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    /* KEEP ALL YOUR CURRENT STYLES AS IS */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5dc;
-      margin: 0;
-      padding: 20px;
-    }
-
-    #header {
+    .cart-float {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--primary);
+      color: var(--white);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 20px;
-      padding: 15px 20px;
-      background-color: #a0522d;
-      border-radius: 15px;
-      color: white;
-      margin-bottom: 20px;
-    }
-
-    #header h1 { color: white; }
-    h2 { text-align: center; color: #8b4513; }
-
-    #policy {
-      max-width: 700px;
-      margin: 0 auto 20px auto;
-      background-color: #fff8f0;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      color: #5a381e;
-    }
-
-    #products {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 30px;
-    }
-
-    .product-card {
-      background-color: #fff8f0;
-      border-radius: 15px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      padding: 15px;
-      width: 200px;
-      text-align: center;
-      position: relative; /* needed for overlay */
-    }
-
-    .product-card img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 10px;
-      display: block;
-    }
-
-    .product-card button {
-      margin-top: 10px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 8px;
-      background-color: #a0522d;
-      color: white;
+      font-size: 1.5rem;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
       cursor: pointer;
-      font-size: 14px;
+      z-index: 100;
     }
 
-    .product-card button:hover { background-color: #8b4513; }
-
-    /* ------------------- NEW: Harvest Overlay ------------------- */
-    .harvest-btn-overlay {
+    .cart-count {
       position: absolute;
-      top: 5px;
-      right: 5px;
-      background-color: rgba(222,184,135,0.5); /* light brown linen with 50% transparency */
+      top: 0;
+      right: 0;
+      background: #ff4d4d;
       color: white;
-      border: none;
+      font-size: 0.75rem;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
-      padding: 6px 9px;
-      cursor: pointer;
-      font-size: 16px;
-      z-index: 10;
-      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .harvest-btn-overlay:hover {
-      background-color: #deb887cc; /* slightly less transparent on hover */
-    }
-
-    .harvest-info-overlay {
-      display: none;
-      position: absolute;
-      bottom: 5px;
-      left: 5px;
-      right: 5px;
-      background-color: rgba(255,243,224,0.95);
-      border-radius: 8px;
-      padding: 8px;
-      font-size: 13px;
-      color: #4b2e2e;
-      z-index: 9;
-      text-align: left;
-    }
-
-    /* Blockchain Verified Badge */
-    .blockchain-badge {
-      display: inline-block;
-      margin-left: 5px;
-      padding: 2px 6px;
-      background-color: #32cd32;
-      color: white;
-      border-radius: 5px;
-      font-size: 12px;
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    /* Modal Styles */
-    #blockchain-modal {
+    #modal-cart {
       display: none;
       position: fixed;
-      z-index: 1000;
-      left: 0;
       top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 101;
     }
 
-    #blockchain-modal-content {
-      background-color: #fff8f0;
-      margin: 10% auto;
-      padding: 20px;
-      border-radius: 15px;
-      width: 80%;
-      max-width: 500px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      position: relative;
+    .modal-content {
+      background: var(--white);
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 30px;
+      border-radius: 20px;
+      max-height: 80vh;
+      overflow-y: auto;
     }
-
-    #blockchain-modal-content h3 {
-      color: #8b4513;
-      text-align: center;
-      margin-top: 0;
-    }
-
-    #blockchain-modal-content p {
-      font-size: 14px;
-      color: #4b2e2e;
-      margin: 8px 0;
-    }
-
-    .close-modal {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 20px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #a0522d;
-    }
-
-    /* Rest of your styles remain unchanged */
-    #cart { background-color: #fff8f0; padding: 15px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 700px; margin: 0 auto 30px auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 8px; border-bottom: 1px solid #ccc; text-align: center; }
-    th { background-color: #a0522d; color: white; border-radius: 5px; }
-    .remove-btn { background-color: #ff4d4d; border-radius: 5px; padding: 5px 8px; cursor: pointer; color: white; border: none; }
-    .remove-btn:hover { background-color: #cc0000; }
-
-    #order-form { max-width: 500px; margin: 0 auto; background-color: #fff8f0; padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-    #order-form input, #order-form textarea, #order-form select, #order-form button { width: 100%; margin: 10px 0; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
-    #order-form button { background-color: #a0522d; color: white; border: none; cursor: pointer; }
-    #order-form button:hover { background-color: #8b4513; }
-
-    #payment-section { display: none; max-width: 700px; margin: 20px auto; background-color: #fff8f0; padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-    #payment-section h3 { color: #8b4513; text-align: center; }
-    #payment-details p { margin: 10px 0; }
-    #payment-section button { background-color: #a0522d; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
-    #payment-section button:hover { background-color: #8b4513; }
-
   </style>
 </head>
-<body>
 
-<div id="header">
-  <img src="logo.png" alt="JonaFarm Logo" width="60" height="60">
-  <h1>Welcome to Green Valley Farm</h1>
-</div>
+<body class="dashboard-grid">
 
-<h2>Buyer Dashboard</h2>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="JonaFarm-logo.png" alt="Logo" width="40">
+      <h2 style="font-size: 1.2rem;">JonaFarm</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active">🛒 Marketplace</a>
+      <a href="#" class="nav-item">📜 My Orders</a>
+      <a href="#" class="nav-item">👤 Profile</a>
+    </nav>
+    <button class="btn btn-outline" style="color: white; border-color: white; margin-top: auto;"
+      onclick="logout()">Logout</button>
+  </aside>
 
-<div id="policy">
-  <h3>How to Order</h3>
-  <ol>
-    <li>Browse products and add items to your cart.</li>
-    <li>Fill in your name, phone number, and delivery address below.</li>
-    <li>Click <strong>Place Order</strong> — payment instructions will appear below.</li>
-    <li>Pay the farmer using the number provided.</li>
-    <li>Click <strong>I Have Paid</strong> to confirm your order.</li>
-    <li>Our distributor will contact you to arrange delivery.</li>
-  </ol>
-</div>
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="top-bar">
+      <div>
+        <h2>Fresh from the Farm</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Direct access to quality produce with blockchain
+          verification.</p>
+      </div>
+      <div id="user-info" style="font-weight: 600; color: var(--primary);"></div>
+    </header>
 
-<div id="products"></div>
+    <!-- Product Grid -->
+    <div class="portal-container" id="products"
+      style="margin: 0; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
+      <!-- Products inserted by JS -->
+    </div>
 
-<h2>Your Cart</h2>
-<div id="cart"></div>
-
-<h2>Place Order</h2>
-<div id="order-form">
-  <input type="text" id="buyer-name" placeholder="Your Name" required>
-  <input type="text" id="buyer-phone" placeholder="Your Phone Number" required>
-  <textarea id="buyer-address" placeholder="Delivery Address" rows="3" required></textarea>
-  <button id="place-order-btn">Place Order</button>
-</div>
-
-<div id="payment-section">
-  <h3>Payment Instructions</h3>
-  <div id="payment-details"></div>
-  <button onclick="confirmPayment()">I Have Paid</button>
-</div>
-
-<!-- Blockchain Modal -->
-<div id="blockchain-modal">
-  <div id="blockchain-modal-content">
-    <span class="close-modal" onclick="closeBlockchainModal()">&times;</span>
-    <h3>Blockchain Verification</h3>
-    <div id="blockchain-history"></div>
-  </div>
-</div>
-
-<script>
-let cart = [];
-
-// ------------------- LOGIN CHECK -------------------
-const loggedBuyer = JSON.parse(localStorage.getItem('buyer'));
-if(!loggedBuyer){
-  alert('❌ You must log in first!');
-  window.location.href = 'buyer-login.html';
-} else {
-  document.getElementById('buyer-name').value = loggedBuyer.name;
-  document.getElementById('buyer-phone').value = loggedBuyer.phone;
-}
-
-// ------------------- PRODUCTS & CART -------------------
-async function loadProducts() {
-  const res = await fetch('/products');
-  const products = await res.json();
-  const container = document.getElementById('products');
-  container.innerHTML = '';
-
-  products.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-      <div style="position: relative;">
-        <img src="${p.image}" alt="${p.name}">
-        <button class="harvest-btn-overlay">⋮</button>
-        <div class="harvest-info-overlay">
-          Last Harvest: ${p.lastHarvestDate || '2026-01-15 '} <br>
-          Next Harvest: ${p.nextHarvestDate || '2026-01-15 '}
+    <!-- Checkout Section (Hidden until order check) -->
+    <div id="checkout-section" style="display: none; margin-top: 40px;">
+      <h3 style="margin-bottom: 20px; color: var(--primary);">Complete Your Order</h3>
+      <div class="stat-card" style="max-width: 600px;">
+        <div id="order-form">
+          <input type="text" id="buyer-name" placeholder="Your Name" class="nav-item"
+            style="width: 100%; background: #f0f0f0; color: #333; margin-bottom: 10px;" required>
+          <input type="text" id="buyer-phone" placeholder="Phone Number" class="nav-item"
+            style="width: 100%; background: #f0f0f0; color: #333; margin-bottom: 10px;" required>
+          <textarea id="buyer-address" placeholder="Delivery Address" class="nav-item"
+            style="width: 100%; background: #f0f0f0; color: #333; margin-bottom: 20px; height: 80px;"
+            required></textarea>
+          <button class="btn btn-primary" style="width: 100%;" id="place-order-btn">Confirm Order</button>
         </div>
       </div>
-      <h3>${p.name}</h3>
-      <p>Price: Ksh ${p.price_ksh}</p>
-      <p>Available: ${p.quantity} ${p.unit}</p>
-      <p>Verified: ${p.verified ? '✅' : '❌'} 
-         ${p.verified ? `<span class="blockchain-badge" onclick="showBlockchainModal('${p.name}')">View Blockchain</span>` : ''}
-      </p>
-      <p>Farmer: ${p.farmer_name || 'John Kimani'} 📞 ${p.farmer_contact || '0712345673'}</p>
-      <button onclick="addToCart('${p.name}', ${p.price_ksh}, '${p.farmer_name || 'John Kimani'}', '${p.farmer_contact || '0712345673'}')">Add to Cart</button>
-    `;
-    container.appendChild(card);
+    </div>
 
-    const harvestBtn = card.querySelector('.harvest-btn-overlay');
-    const harvestInfo = card.querySelector('.harvest-info-overlay');
-    harvestBtn.addEventListener('click', () => {
-      harvestInfo.style.display = harvestInfo.style.display === 'block' ? 'none' : 'block';
+    <!-- Payment Info (Modal or Section) -->
+    <div id="payment-section" style="display: none; margin-top: 20px;">
+      <div class="stat-card" style="border: 2px solid var(--primary); max-width: 600px;">
+        <h3 style="color: var(--primary); margin-bottom: 15px;">Payment Instructions</h3>
+        <div id="payment-details" style="margin-bottom: 20px; font-size: 0.95rem;"></div>
+        <button class="btn btn-primary" style="width: 100%;" onclick="confirmPayment()">I Have Paid</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Cart Floating Button -->
+  <div class="cart-float" onclick="toggleCart()">
+    🛒
+    <div class="cart-count" id="cart-count">0</div>
+  </div>
+
+  <!-- Cart Modal -->
+  <div id="modal-cart" onclick="if(event.target === this) toggleCart()">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 20px; color: var(--primary);">Your Shopping Cart</h3>
+      <div class="table-container" id="cart-container">
+        <!-- Cart items here -->
+      </div>
+      <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h4 id="cart-total">Total: KSh 0</h4>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-outline" onclick="toggleCart()">Continue Shopping</button>
+          <button class="btn btn-primary" onclick="proceedToCheckout()">Checkout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let cart = [];
+    const loggedBuyer = JSON.parse(localStorage.getItem('buyer'));
+    if (!loggedBuyer) {
+      window.location.href = 'buyer-login.html';
+    } else {
+      document.getElementById('user-info').textContent = loggedBuyer.name;
+      document.getElementById('buyer-name').value = loggedBuyer.name;
+      document.getElementById('buyer-phone').value = loggedBuyer.phone || '';
+    }
+
+    function logout() {
+      localStorage.removeItem('buyer');
+      window.location.href = 'index.html';
+    }
+
+    async function loadProducts() {
+      const res = await fetch('/products');
+      const products = await res.json();
+      const container = document.getElementById('products');
+      container.innerHTML = '';
+
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'role-card';
+        card.style.padding = '20px';
+        card.innerHTML = `
+                    <img src="${p.image}" alt="${p.name}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 15px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px;">${p.name}</h3>
+                    <p style="color: var(--primary); font-weight: 700; margin-bottom: 10px;">KSh ${p.price_ksh} / ${p.unit}</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">
+                        Farmer: ${p.farmer_name || 'JonaFarm Member'}<br>
+                        Available: ${p.quantity} ${p.unit}
+                    </p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span class="badge ${p.verified ? 'badge-success' : 'badge-warning'}">${p.verified ? 'Verified' : 'Pending'}</span>
+                        <button class="btn btn-primary" style="padding: 8px 15px;" onclick="addToCart('${p.name}', ${p.price_ksh}, '${p.farmer_name || 'John'}', '${p.farmer_contact || '0712345678'}')">Add</button>
+                    </div>
+                `;
+        container.appendChild(card);
+      });
+    }
+
+    function addToCart(name, price, farmer_name, farmer_contact) {
+      const existing = cart.find(item => item.name === name);
+      if (existing) existing.quantity++;
+      else cart.push({ name, price_ksh: price, quantity: 1, farmer_name, farmer_contact });
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+      document.getElementById('cart-count').textContent = count;
+
+      const container = document.getElementById('cart-container');
+      if (cart.length === 0) {
+        container.innerHTML = '<p style="padding: 20px; text-align: center;">Your cart is empty.</p>';
+        document.getElementById('cart-total').textContent = 'Total: KSh 0';
+        return;
+      }
+
+      let html = `<table><thead><tr><th>Item</th><th>Price</th><th>Qty</th><th>Subtotal</th><th>Action</th></tr></thead><tbody>`;
+      let total = 0;
+      cart.forEach(item => {
+        const sub = item.price_ksh * item.quantity;
+        total += sub;
+        html += `<tr>
+                    <td>${item.name}<br><small>${item.farmer_name}</small></td>
+                    <td>${item.price_ksh}</td>
+                    <td>${item.quantity}</td>
+                    <td>${sub}</td>
+                    <td><button class="badge badge-danger" style="border:none; cursor:pointer;" onclick="removeFromCart('${item.name}')">Remove</button></td>
+                </tr>`;
+      });
+      html += `</tbody></table>`;
+      container.innerHTML = html;
+      document.getElementById('cart-total').textContent = `Total: KSh ${total}`;
+    }
+
+    function removeFromCart(name) {
+      cart = cart.filter(item => item.name !== name);
+      updateCartUI();
+    }
+
+    function toggleCart() {
+      const modal = document.getElementById('modal-cart');
+      modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function proceedToCheckout() {
+      if (cart.length === 0) return alert('Cart is empty');
+      toggleCart();
+      document.getElementById('checkout-section').style.display = 'block';
+      document.getElementById('checkout-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    document.getElementById('place-order-btn').addEventListener('click', async () => {
+      const buyerName = document.getElementById('buyer-name').value.trim();
+      const phone = document.getElementById('buyer-phone').value.trim();
+      const address = document.getElementById('buyer-address').value.trim();
+
+      if (!buyerName || !phone || !address || cart.length === 0) {
+        alert('Please fill all details');
+        return;
+      }
+
+      for (let item of cart) {
+        await fetch('/orders/place', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product: item.name,
+            quantity: item.quantity,
+            buyer: buyerName,
+            phone,
+            address,
+            farmer: item.farmer_name,
+            order_date: new Date().toISOString(),
+            status: 'Pending'
+          })
+        });
+      }
+
+      let paymentInfo = `<strong>Order Summary:</strong><br><br>`;
+      cart.forEach(item => {
+        paymentInfo += `${item.name} x ${item.quantity} (Farmer: ${item.farmer_name} - ${item.farmer_contact})<br>`;
+      });
+      paymentInfo += `<br><strong>Total: KSh ${cart.reduce((sum, i) => sum + i.price_ksh * i.quantity, 0)}</strong><br><br>`;
+      paymentInfo += `Please send payment to the farmer's contact above and click "I Have Paid".`;
+
+      document.getElementById('payment-details').innerHTML = paymentInfo;
+      document.getElementById('payment-section').style.display = 'block';
+      document.getElementById('checkout-section').style.display = 'none';
     });
-  });
-}
 
-// ------------------- Blockchain Modal -------------------
-function showBlockchainModal(productName) {
-  const historyDiv = document.getElementById('blockchain-history');
-  // Mock history for demo; replace with actual blockchain fetch if available
-  historyDiv.innerHTML = `
-    <p><strong>${productName}</strong> verification:</p>
-    <p>✔ Recorded on 2026-01-10 at 10:00 AM</p>
-    <p>✔ Verified by Smart Contract ID: 0xA1B2C3</p>
-    <p>✔ Last Update: 2026-02-01</p>
-  `;
-  document.getElementById('blockchain-modal').style.display = 'block';
-}
+    function confirmPayment() {
+      alert('Order Confirmed! Thank you for shopping with JonaFarm.');
+      cart = [];
+      updateCartUI();
+      document.getElementById('payment-section').style.display = 'none';
+    }
 
-function closeBlockchainModal() {
-  document.getElementById('blockchain-modal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-  if (event.target == document.getElementById('blockchain-modal')) {
-    closeBlockchainModal();
-  }
-}
-
-function addToCart(name, price, farmer_name, farmer_contact) {
-  const existing = cart.find(item => item.name === name);
-  if (existing) existing.quantity++;
-  else cart.push({ name, price_ksh: price, quantity: 1, farmer_name, farmer_contact });
-  loadCart();
-}
-
-function removeFromCart(name) {
-  cart = cart.filter(item => item.name !== name);
-  loadCart();
-}
-
-function loadCart() {
-  const container = document.getElementById('cart');
-  if(cart.length === 0){ container.innerHTML = '<p>Your cart is empty.</p>'; return; }
-  let tableHTML = `<table>
-    <tr>
-      <th>Product</th>
-      <th>Price</th>
-      <th>Quantity</th>
-      <th>Subtotal</th>
-      <th>Farmer</th>
-      <th>Action</th>
-    </tr>`;
-  let total = 0;
-  cart.forEach(item => {
-    const subtotal = item.price_ksh * item.quantity;
-    total += subtotal;
-    tableHTML += `<tr>
-      <td>${item.name}</td>
-      <td>${item.price_ksh}</td>
-      <td>${item.quantity}</td>
-      <td>${subtotal}</td>
-      <td>${item.farmer_name} 📞 ${item.farmer_contact}</td>
-      <td><button class="remove-btn" onclick="removeFromCart('${item.name}')">Remove</button></td>
-    </tr>`;
-  });
-  tableHTML += `<tr><th colspan="3">Total</th><th colspan="3">${total}</th></tr></table>`;
-  container.innerHTML = tableHTML;
-}
-
-// ------------------- PLACE ORDER -------------------
-document.getElementById('place-order-btn').addEventListener('click', async () => {
-  const buyerName = document.getElementById('buyer-name').value.trim();
-  const phone = document.getElementById('buyer-phone').value.trim();
-  const address = document.getElementById('buyer-address').value.trim();
-  const orderDate = new Date().toISOString();
-
-  if (!buyerName || !phone || !address || cart.length === 0) {
-    alert('❌ Please fill in your details and add products to cart.');
-    return;
-  }
-
-  for (let item of cart) {
-    await fetch('/orders/place', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        product: item.name,
-        quantity: item.quantity,
-        buyer: buyerName,
-        phone,
-        address,
-        farmer: item.farmer_name,
-        order_date: orderDate,
-        status:'Pending'
-      })
-    });
-  }
-
-  alert('✅ Order(s) saved! Now follow payment instructions.');
-
-  let paymentInfo = `<p>Order Date: ${orderDate}</p>`;
-  cart.forEach(item => {
-    const subtotal = item.price_ksh * item.quantity;
-    paymentInfo += `<p>${item.name} → Farmer: ${item.farmer_name}, Contact: ${item.farmer_contact}, Amount: Ksh ${subtotal}</p>`;
-  });
-  paymentInfo += `<p><strong>Total: Ksh ${cart.reduce((sum,i)=>sum+i.price_ksh*i.quantity,0)}</strong></p>`;
-  paymentInfo += `<p>Buyer Name: ${buyerName}, Phone: ${phone}, Address: ${address}</p>`;
-
-  document.getElementById('payment-details').innerHTML = paymentInfo;
-  document.getElementById('payment-section').style.display='block';
-});
-
-// ------------------- CONFIRM PAYMENT -------------------
-function confirmPayment() {
-  alert('✅ Payment confirmed! Your order is placed.');
-  cart = [];
-  loadCart();
-  document.getElementById('buyer-address').value='';
-  document.getElementById('payment-section').style.display='none';
-}
-
-// ------------------- INITIAL LOAD -------------------
-loadProducts();
-loadCart();
-</script>
-
+    loadProducts();
+  </script>
 </body>
+
 </html>

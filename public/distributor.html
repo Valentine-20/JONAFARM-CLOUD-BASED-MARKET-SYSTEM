@@ -1,124 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Distributor Dashboard - JonaFarm</title>
-<style>
-body { font-family: Arial, sans-serif; background-color: #f5f5dc; margin: 0; padding: 0; }
-header { display: flex; align-items: center; justify-content: center; gap: 15px; background-color: #a0522d; color: white; padding: 15px; border-radius: 0 0 10px 10px; }
-header img { height: 50px; border-radius: 8px; }
-header h1 { margin: 0; font-size: 24px; }
-table { width: 95%; margin: 20px auto; border-collapse: collapse; }
-th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
-th { background-color: #d2691e; color: white; }
-button { padding: 5px 10px; background-color: #d2691e; color: white; border: none; border-radius: 5px; cursor: pointer; }
-button:hover { background-color: #8b4513; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distributor Dashboard - JonaFarm Market</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-<header>
-  <img src="logo.png" alt="JonaFarm Logo">
-  <h1>Distributor Dashboard</h1>
-</header>
+<body class="dashboard-grid">
 
-<table id="orders-table">
-  <thead>
-    <tr>
-      <th>Order ID</th>
-      <th>Buyer</th>
-      <th>Phone</th>
-      <th>Address</th>
-      <th>Product</th>
-      <th>Quantity</th>
-      <th>Order Date</th>
-      <th>Status</th>
-      <th>Update Status</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="JonaFarm-logo.png" alt="Logo" width="40">
+      <h2 style="font-size: 1.2rem;">JonaFarm</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active">🚚 Deliveries</a>
+      <a href="#" class="nav-item">📊 Performance</a>
+      <a href="#" class="nav-item">👤 Profile</a>
+    </nav>
+    <button class="btn btn-outline" style="color: white; border-color: white; margin-top: auto;"
+      onclick="logout()">Logout</button>
+  </aside>
 
-<script>
-const distributor = JSON.parse(localStorage.getItem('distributor'));
-if (!distributor) window.location.href = 'distributor-login.html';
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="top-bar">
+      <div>
+        <h2 id="distributor-name">Distributor Dashboard</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Manage your active deliveries and routes.</p>
+      </div>
+    </header>
 
-async function loadOrders() {
-  try {
-    const res = await fetch('/orders/distributor');
-    const orders = await res.json();
-    const tbody = document.querySelector('#orders-table tbody');
-    tbody.innerHTML = '';
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h4>Active Tasks</h4>
+        <div class="value" id="stat-active-tasks">0</div>
+      </div>
+      <div class="stat-card">
+        <h4>Completed</h4>
+        <div class="value" id="stat-completed-tasks">0</div>
+      </div>
+    </div>
 
-    orders
-      .filter(o => o.distributor === distributor.username || o.distributor === '') // only orders for this distributor
-      .forEach(order => {
-        const orderDate = order.order_date ? new Date(order.order_date).toLocaleString() : 'N/A';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.buyer}</td>
-          <td>${order.phone || 'N/A'}</td>
-          <td>${order.address}</td>
-          <td>${order.product}</td>
-          <td>${order.quantity}</td>
-          <td>${orderDate}</td>
-          <td id="status-${order.id}">${order.status}</td>
-          <td>
-            ${order.status !== 'Delivered' ? `<button onclick="markDelivered(${order.id})">Mark Delivered</button>` : '✅ Delivered'}
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-  } catch(err) { console.error(err); }
-}
+    <!-- Deliveries Table -->
+    <h3 style="margin-bottom: 20px; color: var(--primary);">Assigned Deliveries</h3>
+    <div class="table-container">
+      <table id="orders-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Buyer</th>
+            <th>Address</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Content inserted by JS -->
+        </tbody>
+      </table>
+    </div>
+  </main>
 
-async function markDelivered(orderId) {
-  try {
-    const res = await fetch('/orders/distributor/update', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: orderId, status: 'Delivered', distributor: distributor.username })
-    });
+  <script>
+    const distributor = JSON.parse(localStorage.getItem('distributor'));
+    if (!distributor) window.location.href = 'distributor-login.html';
+    else document.getElementById('distributor-name').textContent = `Welcome, ${distributor.username}!`;
 
-    const data = await res.json();
-    if (res.ok) loadOrders();
-    else alert(data.message || 'Error updating order');
-  } catch(err) { console.error(err); }
-}
+    function logout() {
+      localStorage.removeItem('distributor');
+      window.location.href = 'index.html';
+    }
 
-loadOrders();
-</script>
+    async function loadOrders() {
+      try {
+        const res = await fetch('/orders/distributor');
+        const orders = await res.json();
+        const tbody = document.querySelector('#orders-table tbody');
+        tbody.innerHTML = '';
 
+        let activeCount = 0;
+        let completedCount = 0;
+
+        orders
+          .filter(o => o.distributor === distributor.username || o.distributor === '')
+          .forEach(order => {
+            if (order.status === 'Delivered') completedCount++;
+            else activeCount++;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                            <td>#${order.id}</td>
+                            <td>${order.buyer}<br><small>${order.phone || 'N/A'}</small></td>
+                            <td>${order.address}</td>
+                            <td>${order.product}</td>
+                            <td>${order.quantity}</td>
+                            <td>${order.order_date ? new Date(order.order_date).toLocaleDateString() : 'N/A'}</td>
+                            <td><span class="badge ${order.status === 'Delivered' ? 'badge-success' : 'badge-warning'}">${order.status}</span></td>
+                            <td>
+                                ${order.status !== 'Delivered' ? `<button class="btn btn-primary btn-sm" style="padding: 5px 10px; font-size: 0.8rem;" onclick="markDelivered(${order.id})">Mark Delivered</button>` : '✅ Done'}
+                            </td>
+                        `;
+            tbody.appendChild(tr);
+          });
+
+        document.getElementById('stat-active-tasks').textContent = activeCount;
+        document.getElementById('stat-completed-tasks').textContent = completedCount;
+      } catch (err) { console.error(err); }
+    }
+
+    async function markDelivered(orderId) {
+      try {
+        const res = await fetch('/orders/distributor/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: orderId, status: 'Delivered', distributor: distributor.username })
+        });
+        if (res.ok) loadOrders();
+        else {
+          const data = await res.json();
+          alert(data.message || 'Error updating order');
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    loadOrders();
+  </script>
 </body>
+
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
