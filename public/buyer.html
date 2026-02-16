@@ -75,6 +75,7 @@
       padding: 20px;
       text-align: center;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
     }
 
     .product-card img {
@@ -374,7 +375,8 @@
     }
 
     function toggleMenu(pName) {
-      const info = document.getElementById('info-' + pName);
+      const sanitizedId = 'info-' + pName.replace(/\s+/g, '-');
+      const info = document.getElementById(sanitizedId);
       info.style.display = (info.style.display === 'block') ? 'none' : 'block';
     }
 
@@ -389,7 +391,7 @@
         card.className = 'product-card';
         card.innerHTML = `
         <div class="menu-dots" onclick="toggleMenu('${p.name.replace(/'/g, "\\'")}')">⋮</div>
-        <div class="harvest-info" id="info-${p.name}">
+        <div class="harvest-info" id="info-${p.name.replace(/\s+/g, '-')}">
           Last Harvest: 2026-01-10<br>
           Next Harvest: 2026-02-10
         </div>
