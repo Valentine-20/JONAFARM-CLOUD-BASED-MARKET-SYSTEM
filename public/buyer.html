@@ -291,6 +291,67 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       z-index: 5;
     }
+
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #fff9e6;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border: 2px solid #8b4513;
+    }
+
+    .modal-content h2 {
+      color: #8b4513;
+      text-align: center;
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #8b4513;
+      font-weight: bold;
+    }
+
+    .verification-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    .verification-list li {
+      margin-bottom: 15px;
+      font-size: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .verification-list li span.check {
+      color: #8b4513;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -363,6 +424,20 @@
       <h3>Payment Instructions</h3>
       <div id="payment-details"></div>
       <button class="pay-btn" onclick="confirmPayment()">I Have Paid</button>
+    </div>
+  </div>
+
+  <!-- Blockchain Verification Modal -->
+  <div id="blockchain-modal" class="modal-overlay">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <h2>Blockchain Verification</h2>
+      <p id="modal-product-name" style="font-weight: bold; color: #8b4513; margin-bottom: 10px;"></p>
+      <ul class="verification-list">
+        <li><span class="check">✓</span> Recorded on 2026-01-10 at 10:00 AM</li>
+        <li><span class="check">✓</span> Verified by Smart Contract ID: 0xA1B2C3</li>
+        <li><span class="check">✓</span> Last Update: 2026-02-01</li>
+      </ul>
     </div>
   </div>
 
@@ -499,7 +574,20 @@
     }
 
     function viewBlockchain(name) {
-      location.href = 'farmer-blockchain.html?product=' + encodeURIComponent(name);
+      document.getElementById('modal-product-name').textContent = `${name} verification:`;
+      document.getElementById('blockchain-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('blockchain-modal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function (event) {
+      const modal = document.getElementById('blockchain-modal');
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
     }
 
     loadProducts();
