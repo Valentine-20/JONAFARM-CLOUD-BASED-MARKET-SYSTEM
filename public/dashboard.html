@@ -31,150 +31,151 @@
       font-size: 32px;
     }
 
-    .dashboard-title {
-      text-align: center;
-      color: #8b4513;
-      font-size: 28px;
-      margin-bottom: 30px;
-      font-weight: bold;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 1100px;
-      margin: 0 auto 20px;
-    }
-
-    .stats-container {
-      display: flex;
-      gap: 20px;
-      max-width: 1100px;
-      margin: 0 auto 40px;
-    }
-
-    .stat-card {
-      background: #fff9e6;
-      border: 1px solid #eee;
-      padding: 20px;
-      border-radius: 15px;
-      flex: 1;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .stat-card h4 {
-      margin: 0 0 10px 0;
-      color: #8b4513;
-    }
-
-    .stat-card .value {
+    .welcome-msg {
       font-size: 24px;
-      font-weight: bold;
-      color: #4b2e2e;
+      color: #8b4513;
+      margin-bottom: 40px;
     }
 
+    /* Product Cards Area */
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 25px;
-      max-width: 1100px;
-      margin: 0 auto 50px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
     }
 
     .product-card {
       background: #fff9e6;
-      border-radius: 15px;
-      padding: 20px;
+      border-radius: 25px;
+      padding: 25px;
       text-align: center;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
     }
 
     .product-card img {
       width: 100%;
-      height: 130px;
+      height: 180px;
       object-fit: cover;
-      border-radius: 10px;
+      border-radius: 20px;
       margin-bottom: 15px;
     }
 
+    .harvest-info {
+      position: absolute;
+      top: 150px;
+      left: 35px;
+      background: rgba(255, 249, 230, 0.9);
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      text-align: left;
+      border: 1px solid #d2691e;
+    }
+
     .product-card h4 {
-      margin: 0 0 10px 0;
+      margin: 10px 0;
       color: #8b4513;
+      font-size: 22px;
+    }
+
+    .product-card p {
+      margin: 5px 0;
       font-size: 18px;
     }
 
-    .table-container {
+    .status-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .status-verified {
+      color: #28a745;
+    }
+
+    /* Table Style */
+    .section-container {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .section-container h2 {
+      color: #8b4513;
+      font-size: 28px;
+    }
+
+    .table-box {
       background: #fff9e6;
-      padding: 30px;
-      border-radius: 15px;
-      max-width: 1100px;
-      margin: 0 auto 40px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      padding: 40px;
+      border-radius: 20px;
+      margin-bottom: 60px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
     }
 
     th {
       background: #8b4513;
       color: white;
-      padding: 12px;
-    }
-
-    td {
-      padding: 12px;
-      border: 1px solid #d2691e;
+      padding: 15px;
       text-align: center;
     }
 
-    .btn {
-      padding: 10px 20px;
+    td {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .status-badge {
+      background: #d2691e;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .logout-btn {
+      background: #ff0000;
+      color: white;
       border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .btn-primary {
-      background: #8b4513;
-      color: white;
-      font-size: 14px;
-    }
-
-    .btn-primary:hover {
-      opacity: 0.9;
-    }
-
-    .btn-logout {
-      background: #ff4d4d;
-      color: white;
-    }
-
-    .badge {
-      padding: 5px 10px;
+      padding: 10px 20px;
       border-radius: 5px;
-      font-size: 14px;
+      cursor: pointer;
+      float: right;
+      margin-top: -60px;
       font-weight: bold;
     }
 
-    .badge-success {
-      background: #d4edda;
-      color: #155724;
+    /* Blockchain Table Specifics */
+    .bc-table td {
+      font-size: 14px;
+      line-height: 1.4;
+      vertical-align: middle;
     }
 
-    .badge-warning {
-      background: #fff3cd;
-      color: #856404;
+    .bc-table .hash-cell {
+      font-family: monospace;
+      font-size: 12px;
+      word-break: break-all;
+      max-width: 250px;
     }
 
-    h3 {
-      color: #8b4513;
-      margin-top: 0;
+    .alt-row {
+      background: #e8f5e9;
     }
   </style>
 </head>
@@ -183,175 +184,136 @@
 
   <div class="header-banner">
     <img src="JonaFarm-logo.png" alt="Logo" width="40">
-    <h1>Welcome to Green Valley Farm</h1>
+    <h1>JonaFarm Market Dashboard</h1>
   </div>
 
-  <header>
-    <div class="dashboard-title" id="welcome-msg" style="margin: 0;">Welcome, Farmer!</div>
-    <button class="btn btn-logout" onclick="logout()">Logout</button>
-  </header>
+  <button class="logout-btn" onclick="logout()">Logout</button>
 
-  <div class="stats-container">
-    <div class="stat-card">
-      <h4>Total Items</h4>
-      <div class="value" id="stat-total-items">0</div>
-    </div>
-    <div class="stat-card">
-      <h4>Verified</h4>
-      <div class="value" id="stat-verified-items">0</div>
-    </div>
-    <div class="stat-card">
-      <h4>Pending Orders</h4>
-      <div class="value" id="stat-pending-orders">0</div>
-    </div>
+  <div class="welcome-msg" id="farmer-welcome">Welcome, John Kimani from Green Valley Farm!</div>
+
+  <div class="products-grid" id="products-grid">
+    <!-- Products via JS -->
   </div>
 
-  <div class="table-container" style="background: transparent; box-shadow: none; padding: 0; max-width: 1100px;">
-    <h3>My Products</h3>
-    <div class="products-grid" id="product-cards">
-      <!-- Inserted by JS -->
-    </div>
+  <div class="section-container">
+    <h2>Orders</h2>
   </div>
-
-  <div class="table-container">
-    <h3>Recent Orders</h3>
-    <table id="orders-table">
+  <div class="table-box">
+    <table>
       <thead>
         <tr>
-          <th>Buyer</th>
+          <th>Buyer Name</th>
+          <th>Phone</th>
+          <th>Address</th>
           <th>Product</th>
           <th>Quantity</th>
-          <th>Total</th>
-          <th>Date</th>
+          <th>Total Price</th>
+          <th>Order Date</th>
           <th>Status</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody id="orders-body">
+        <!-- Orders via JS -->
+      </tbody>
     </table>
   </div>
 
-  <div class="table-container">
-    <h3>System Blockchain</h3>
-    <table>
+  <div class="section-container">
+    <h2>Product Blockchain</h2>
+  </div>
+  <div class="table-box">
+    <table class="bc-table">
       <thead>
         <tr>
           <th>Index</th>
           <th>Timestamp</th>
           <th>Action</th>
           <th>Product</th>
+          <th>Previous Hash</th>
           <th>Hash</th>
         </tr>
       </thead>
-      <tbody id="blockchain-table"></tbody>
+      <tbody id="blockchain-body">
+        <!-- Blockchain via JS -->
+      </tbody>
     </table>
   </div>
 
   <script>
-    const farmer = JSON.parse(localStorage.getItem('farmer'));
-    if (!farmer) window.location.href = 'login.html';
-    else document.getElementById('welcome-msg').textContent = `Welcome, ${farmer.name}!`;
+    const farmer = JSON.parse(localStorage.getItem('farmer')) || { name: 'John Kimani', farm: 'Green Valley Farm' };
+    document.getElementById('farmer-welcome').textContent = `Welcome, ${farmer.name} from ${farmer.farm || 'Green Valley Farm'}!`;
 
-    function logout() {
-      localStorage.removeItem('farmer');
-      window.location.href = 'index.html';
-    }
+    function logout() { localStorage.removeItem('farmer'); window.location.href = 'index.html'; }
 
-    function renderProductCards(products) {
-      const productCards = document.getElementById('product-cards');
-      productCards.innerHTML = '';
-      let verifiedCount = 0;
+    async function loadData() {
+      // Load Products
+      const pRes = await fetch('/products');
+      const products = await pRes.json();
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = '';
 
       products.forEach(p => {
-        if (p.verified) verifiedCount++;
         const card = document.createElement('div');
         card.className = 'product-card';
         card.innerHTML = `
-        <img src="${p.image || 'placeholder.jpg'}" alt="${p.name}">
+        <div class="harvest-info">
+          Last Harvest: 2026-01-10<br>
+          Next Harvest: 2026-02-10
+        </div>
+        <img src="${p.image}" alt="${p.name}">
         <h4>${p.name}</h4>
-        <p>${p.quantity} ${p.unit} - KSh ${p.price_ksh}</p>
-        <span class="badge ${p.verified ? 'badge-success' : 'badge-warning'}">
-          ${p.verified ? "Verified" : "Pending"}
-        </span>
-        ${!p.verified ? `<button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="verifyProduct('${p.name}')">Verify</button>` : ""}
+        <p>Price: KSh ${p.price_ksh} per ${p.unit}</p>
+        <p>Quantity: ${p.quantity} ${p.unit}</p>
+        <div class="status-line">Status: <span class="status-verified">✅ Verified</span></div>
       `;
-        productCards.appendChild(card);
+        grid.appendChild(card);
       });
 
-      document.getElementById('stat-total-items').textContent = products.length;
-      document.getElementById('stat-verified-items').textContent = verifiedCount;
-    }
+      // Load Orders
+      const oRes = await fetch(`/orders/farmer/${encodeURIComponent(farmer.name)}`);
+      const orders = await oRes.json();
+      const oBody = document.getElementById('orders-body');
+      oBody.innerHTML = '';
 
-    async function verifyProduct(name) {
-      const res = await fetch('/products/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name })
+      orders.forEach(o => {
+        const product = products.find(prod => prod.name === o.product);
+        const total = (product ? product.price_ksh : 0) * o.quantity;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+        <td>${o.buyer}</td>
+        <td>${o.phone || '0723456782'}</td>
+        <td>${o.address}</td>
+        <td>${o.product}</td>
+        <td>${o.quantity}</td>
+        <td>KSh ${total}</td>
+        <td>${o.order_date ? new Date(o.order_date).toLocaleString() : 'N/A'}</td>
+        <td><span class="status-badge">Delivered</span></td>
+      `;
+        oBody.appendChild(tr);
       });
-      if (res.ok) loadProducts();
-      else alert('Error verifying product');
+
+      // Load Blockchain
+      const bcRes = await fetch('/blockchain/products');
+      const chain = await bcRes.json();
+      const bcBody = document.getElementById('blockchain-body');
+      bcBody.innerHTML = '';
+
+      chain.forEach((block, idx) => {
+        const tr = document.createElement('tr');
+        if (idx % 2 !== 0) tr.className = 'alt-row';
+        tr.innerHTML = `
+        <td>${block.index}</td>
+        <td>${new Date(block.timestamp).toLocaleString()}</td>
+        <td>${block.productAction.action}</td>
+        <td>${block.productAction.product.name || block.productAction.product}</td>
+        <td class="hash-cell">${block.previousHash || '0'}</td>
+        <td class="hash-cell">${block.hash}</td>
+      `;
+        bcBody.appendChild(tr);
+      });
     }
 
-    async function loadProducts() {
-      try {
-        const res = await fetch('/products');
-        const products = await res.json();
-        window.productsList = products;
-        renderProductCards(products);
-        await loadOrders();
-        await loadProductBlockchain();
-      } catch (err) { console.error(err); }
-    }
-
-    async function loadOrders() {
-      if (!window.productsList) return;
-      try {
-        const res = await fetch(`/orders/farmer/${encodeURIComponent(farmer.name)}`);
-        const orders = await res.json();
-        const tbody = document.querySelector('#orders-table tbody');
-        tbody.innerHTML = '';
-
-        let pendingCount = 0;
-        orders.forEach(order => {
-          if (order.status !== 'Delivered') pendingCount++;
-          const product = window.productsList.find(p => p.name === order.product);
-          const totalPrice = (product ? product.price_ksh : 0) * order.quantity;
-
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-          <td>${order.buyer}</td>
-          <td>${order.product}</td>
-          <td>${order.quantity}</td>
-          <td>KSh ${totalPrice}</td>
-          <td>${order.order_date ? new Date(order.order_date).toLocaleDateString() : 'N/A'}</td>
-          <td><span class="badge ${order.status === 'Delivered' ? 'badge-success' : 'badge-warning'}">${order.status || 'Pending'}</span></td>
-        `;
-          tbody.appendChild(tr);
-        });
-        document.getElementById('stat-pending-orders').textContent = pendingCount;
-      } catch (err) { console.error(err); }
-    }
-
-    async function loadProductBlockchain() {
-      try {
-        const res = await fetch('/blockchain/products');
-        const chain = await res.json();
-        const tbody = document.getElementById('blockchain-table');
-        tbody.innerHTML = '';
-        chain.slice(-5).reverse().forEach(block => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-          <td>#${block.index}</td>
-          <td>${new Date(block.timestamp).toLocaleTimeString()}</td>
-          <td>${block.productAction.action}</td>
-          <td>${block.productAction.product.name || block.productAction.product}</td>
-          <td style="font-family: monospace; font-size: 0.8rem;">${block.hash.substring(0, 10)}...</td>
-        `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) { console.error(err); }
-    }
-
-    loadProducts();
+    loadData();
   </script>
 </body>
 
