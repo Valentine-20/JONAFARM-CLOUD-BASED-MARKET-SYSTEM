@@ -6,6 +6,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Farmer Dashboard - JonaFarm Market</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --primary: #8b4513;
+      --primary-dark: #5d2e0d;
+      --secondary: #d2691e;
+      --bg-light: #f5f5dc;
+      --white: #fff8f0;
+      --text-dark: #4b2e2e;
+    }
+
+    .sidebar {
+      background: var(--primary);
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-primary {
+      background: var(--secondary);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary);
+    }
+
+    .stat-card .value {
+      color: var(--primary);
+    }
+
+    .badge-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+  </style>
 </head>
 
 <body class="dashboard-grid">
@@ -129,7 +170,7 @@
                             ${p.verified ? "Verified" : "Pending"}
                         </span>
                     </div>
-                    ${!p.verified ? `<button class="btn btn-primary" id="verify-${p.name}" style="width: 100%; margin-top: 10px; padding: 8px;">Verify</button>` : ""}
+                    ${!p.verified ? `<button class="btn btn-primary" id="verify-${p.name}" style="width: 100%; margin-top: 10px; padding: 8px; font-size: 0.8rem;">Verify</button>` : ""}
                 `;
         productCards.appendChild(card);
 
