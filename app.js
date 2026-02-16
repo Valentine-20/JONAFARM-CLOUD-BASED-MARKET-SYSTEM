@@ -54,8 +54,8 @@ app.get('/products', (req, res) => {
 
 app.post('/products/add', (req, res) => {
   const { name, price_ksh, quantity, unit, image } = req.body;
-  if (!name || !price_ksh || !quantity || !unit || !image) {
-    return res.status(400).json({ message: 'All fields required' });
+  if (!name || !price_ksh || !quantity || !unit) {
+    return res.status(400).json({ message: 'Missing required text fields' });
   }
 
   try {
@@ -297,7 +297,8 @@ app.get('/orders/distributor', (req, res) => {
 });
 
 app.post('/orders/distributor/update', (req, res) => {
-  const { id, status, distributor } = req.body;
+  const { id: rawId, status, distributor } = req.body;
+  const id = Number(rawId);
   if (!id || !status || !distributor) return res.status(400).json({ message: 'Missing required fields' });
   try {
     const orders = fs.existsSync(ordersFile) ? JSON.parse(fs.readFileSync(ordersFile, 'utf-8')) : [];
